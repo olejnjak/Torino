@@ -5,5 +5,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Select Xcode 11.4
+      run: sudo xcode-select -switch /Applications/Xcode_11.4.app
     - name: Run tests
       run: swift test -v
