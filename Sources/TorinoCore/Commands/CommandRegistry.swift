@@ -1,6 +1,7 @@
 import Foundation
 import TSCBasic
 import TSCUtility
+import CarthageKit
 
 public struct CommandRegistry {
     private let argumentParser: ArgumentParser
