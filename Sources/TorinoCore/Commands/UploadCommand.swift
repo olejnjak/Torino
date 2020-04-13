@@ -47,34 +47,27 @@ internal struct UploadCommand: Command {
             }
             
             /// Check that that all dependencies match with its version file
-            let mismatchedDependencies = versionFiles.map { dependency, versionFile -> SignalProducer<Void, TorinoError> in
+            let mismatchedDependencies = versionFiles.map { dependency, versionFile -> SignalProducer<DependencyMismatch?, TorinoError> in
                 guard let versionFile = versionFile, let version = resolvedCartfile.dependencies[dependency] else {
                     let mismatch = DependencyMismatch(dependency: dependency, resolvedVersion: resolvedCartfile.dependencies[dependency], versionFileCommitish: nil)
-                    return SignalProducer(error: TorinoError.versionFileMismatch([mismatch]))
+                    return SignalProducer(value: mismatch)
                 }
                 
                 let allPlatformsMatch = platforms.map { versionFile.satisfies(platform: $0,
                                                                               commitish: version.commitish,
                                                                               binariesDirectoryURL: project.rootBinariesURL,
                                                                               localSwiftVersion: swiftVersion) }
-                return SignalProducer(allPlatformsMatch).flatten(.merge)
+                return SignalProducer(allPlatformsMatch).flatten(.concat)
                     .mapError(TorinoError.init)
                     .collect()
-                    .map { x -> Bool in x.reduce(true) { $0 && $1 } }
-                    .attemptMap { $0 ? .success(()) : .failure(TorinoError.versionFileMismatch([DependencyMismatch(dependency: dependency, resolvedVersion: version, versionFileCommitish: versionFile.commitish)])) }
+                    .map { $0.contains(false) }
+                    .map { $0 ? DependencyMismatch(dependency: dependency, resolvedVersion: version, versionFileCommitish: versionFile.commitish) : nil }
             }
             
             return SignalProducer(mismatchedDependencies).flatten(.concat)
-            //                return versionCheck.flatMap(.latest) { versionCheck -> SignalProducer<Void, TorinoError> in
-            //                    /// List of dependencies that have mismatched versions
-            //                    let mismatchedDependencies = versionCheck.compactMap { dependency, match in
-            //                        match ? nil : dependency
-            //                    }
-            //                    return .empty
-            //
-            ////                    mismatchedDependencies.isEmpty ? uploader.upload(resolvedCartfile, from: project) : SignalProducer
-            ////                    versionsMatch ?  : SignalProducer(error: .versionFileMismatch)
-            //                }
+                .collect()
+                .map { $0.compactMap { $0 } }
+                .attemptMap { $0.isEmpty ? .success(()) : .failure(TorinoError.versionFileMismatch($0)) }
         }.wait()
         
         print("[RESULT]", result)
