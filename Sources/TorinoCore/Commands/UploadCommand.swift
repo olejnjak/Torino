@@ -38,7 +38,7 @@ internal struct UploadCommand: Command {
                 swiftVersion(usingToolchain: toolchain).map { (resolvedCartfile, $0) }
                     .mapError { CarthageError.internalError(description: $0.description) }
                     .mapError(TorinoError.init)
-        }.flatMap(.latest) { resolvedCartfile, swiftVersion -> SignalProducer<Void, TorinoError> in
+        }.flatMap(.latest) { resolvedCartfile, swiftVersion -> SignalProducer<ResolvedCartfile, TorinoError> in
             /// Load version file for each dependency
             let versionFiles = resolvedCartfile.dependencies.keys.map { dependency -> (Dependency, VersionFile?) in
                 let versionFileURL = VersionFile.url(for: dependency, rootDirectoryURL: project.directoryURL)
@@ -67,8 +67,10 @@ internal struct UploadCommand: Command {
             return SignalProducer(mismatchedDependencies).flatten(.concat)
                 .collect()
                 .map { $0.compactMap { $0 } }
-                .attemptMap { $0.isEmpty ? .success(()) : .failure(TorinoError.versionFileMismatch($0)) }
-        }.wait()
+                .attemptMap { $0.isEmpty ? .success(resolvedCartfile) : .failure(TorinoError.versionFileMismatch($0)) }
+        }
+        .flatMap(.latest) { uploader.upload($0, platforms: [.iOS], from: project) }
+        .wait()
         
         print("[RESULT]", result)
     }

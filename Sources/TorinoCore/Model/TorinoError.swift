@@ -9,11 +9,19 @@ public enum TorinoError: Error {
     ///
     /// Dependencies with 
     case versionFileMismatch([DependencyMismatch])
+    
+    case unknown(description: String)
 }
 
 internal extension TorinoError {
     /// Convenience init for errors thrown by `CarthageKit`
     init(carthageError: CarthageError) {
         self = .carthage(carthageError)
+    }
+    
+    /// Convenience init for errors thrown by `CarthageKit`
+    init(swiftError: SwiftVersionError) {
+        let carthageError = CarthageError.internalError(description: swiftError.description)
+        self.init(carthageError: carthageError)
     }
 }
