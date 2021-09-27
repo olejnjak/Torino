@@ -39,6 +39,8 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
                 version: dependency.version
             )
             
+            guard fileSystem.exists(cacheDir) else { return }
+            
             let cachedFiles = try fileSystem.getDirectoryContents(cacheDir)
             
             cachedFiles.forEach { path in
