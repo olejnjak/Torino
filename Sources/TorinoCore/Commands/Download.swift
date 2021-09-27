@@ -6,6 +6,8 @@ struct DownloadError: Error {
 }
 
 struct Download: ParsableCommand {
+    @Option var prefix: String
+    
     func run() throws {
         guard let cwd = localFileSystem.currentWorkingDirectory else {
             throw UploadError(message: "Unable to get current working directory")
@@ -13,7 +15,7 @@ struct Download: ParsableCommand {
         
         let pathProvider = try CarthagePathProvider(
             base: cwd,
-            prefix: "Swift-5.5"
+            prefix: prefix
         )
         
         let lockfilePath = pathProvider.lockfile()
