@@ -11,30 +11,27 @@ protocol DependenciesUploading {
 
 struct LocalDependenciesUploader: DependenciesUploading {
     private let fileSystem: FileSystem
+    private let pathProvider: PathProviding
     
     // MARK: - Initializers
     
-    init(fileSystem: FileSystem = localFileSystem) {
+    init(
+        fileSystem: FileSystem = localFileSystem,
+        pathProvider: PathProviding
+    ) {
         self.fileSystem = fileSystem
+        self.pathProvider = pathProvider
     }
     
     func uploadDependencies(_ dependencies: [Dependency], prefix: String) throws {
-        guard let cacheDir = fileSystem.cachesDirectory else {
-            throw DependenciesUploadError(message: "Unable to get caching directory")
-        }
-        
-        let torinoDir = cacheDir.appending(components: "Torino", prefix)
-        
-        if fileSystem.isFile(torinoDir) {
-            try fileSystem.removeFileTree(torinoDir)
-        }
-        
-        try? fileSystem.createDirectory(torinoDir, recursive: true)
-        
         try dependencies.forEach { dependency in
-            let dependencyDir = torinoDir.appending(components: dependency.name, dependency.version)
+            let dependencyDir = pathProvider.cacheDir(
+                dependency: dependency.name,
+                version: dependency.version,
+                prefix: prefix
+            )
         
-            try? fileSystem.createDirectory(dependencyDir, recursive: true)
+            try fileSystem.createDirectory(dependencyDir, recursive: true)
             
             try dependency.frameworks.forEach { container in
                 let destination = dependencyDir.appending(component: container.name)
@@ -43,7 +40,10 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 try fileSystem.copy(from: container.path, to: destination)
             }
             
-            try fileSystem.copy(from: dependency.versionFile, to: dependencyDir.appending(component: dependency.versionFile.basename))
+            try fileSystem.copy(
+                from: dependency.versionFile,
+                to: dependencyDir.appending(component: dependency.versionFile.basename)
+            )
         }
     }
 }

@@ -11,29 +11,34 @@ public protocol DependenciesLoading {
 
 public struct CarthageDependenciesLoader: DependenciesLoading {
     private let fileSystem: FileSystem
+    private let pathProvider: PathProviding
     private let jsonDecoder = JSONDecoder()
     
     // MARK: - Initializers
     
-    public init(fileSystem: FileSystem = localFileSystem) {
+    public init(
+        fileSystem: FileSystem = localFileSystem,
+        pathProvider: PathProviding
+    ) {
         self.fileSystem = fileSystem
+        self.pathProvider = pathProvider
     }
     
     public func loadDependencies(at path: AbsolutePath) throws -> [Dependency] {
-        let carthageBuildDir = path.appending(components: "Carthage", "Build")
+        let buildDir = pathProvider.buildDir()
         
-        guard fileSystem.exists(carthageBuildDir) else {
+        guard fileSystem.exists(buildDir) else {
             throw DependenciesLoadingError(message: "Carthage/Build directory doesn't exist at \(path)")
         }
         
-        guard fileSystem.isDirectory(carthageBuildDir) else {
+        guard fileSystem.isDirectory(buildDir) else {
             throw DependenciesLoadingError(message: "Carthage/Build is not a directory at \(path)")
         }
         
         let isVersionFile: (String) -> Bool = { $0.hasPrefix(".") && $0.hasSuffix(".version") }
-        let versionFiles = try fileSystem.getDirectoryContents(carthageBuildDir)
+        let versionFiles = try fileSystem.getDirectoryContents(buildDir)
             .filter(isVersionFile)
-            .map { carthageBuildDir.appending(component: $0) }
+            .map { buildDir.appending(component: $0) }
             .map { VersionFilePath(path: $0) }
             .map { versionFilePath -> VersionFileWithName in
                 let bytes = try fileSystem.readFileContents(versionFilePath.path)
@@ -50,7 +55,7 @@ public struct CarthageDependenciesLoader: DependenciesLoading {
                 name: $0.name,
                 version: $0.versionFile.commitish,
                 frameworks: $0.versionFile.allContainers.map {
-                    .init(name: $0, path: carthageBuildDir.appending(component: $0))
+                    .init(name: $0, path: buildDir.appending(component: $0))
                 },
                 versionFile: $0.path
             )

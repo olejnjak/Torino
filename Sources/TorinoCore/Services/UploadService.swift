@@ -8,8 +8,8 @@ final class UploadService {
     // MARK: - Initializers
     
     init(
-        dependenciesLoader: DependenciesLoading = CarthageDependenciesLoader(),
-        dependenciesUploader: DependenciesUploading = LocalDependenciesUploader()
+        dependenciesLoader: DependenciesLoading,
+        dependenciesUploader: DependenciesUploading
     ) {
         self.dependenciesLoader = dependenciesLoader
         self.dependenciesUploader = dependenciesUploader

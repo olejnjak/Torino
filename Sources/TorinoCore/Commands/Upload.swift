@@ -11,6 +11,14 @@ struct Upload: ParsableCommand {
             throw UploadError(message: "Unable to get current working directory")
         }
         
-        try UploadService().run(path: cwd)
+        let pathProvider = try CarthagePathProvider(
+            base: cwd,
+            prefix: "Swift-5.5"
+        )
+        
+        try UploadService(
+            dependenciesLoader: CarthageDependenciesLoader(pathProvider: pathProvider),
+            dependenciesUploader: LocalDependenciesUploader(pathProvider: pathProvider)
+        ).run(path: cwd)
     }
 }
