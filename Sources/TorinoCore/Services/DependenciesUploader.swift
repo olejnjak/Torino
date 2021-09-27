@@ -27,8 +27,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
         try dependencies.forEach { dependency in
             let dependencyDir = pathProvider.cacheDir(
                 dependency: dependency.name,
-                version: dependency.version,
-                prefix: prefix
+                version: dependency.version
             )
         
             try fileSystem.createDirectory(dependencyDir, recursive: true)

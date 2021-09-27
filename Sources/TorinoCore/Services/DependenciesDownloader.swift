@@ -11,7 +11,7 @@ struct DownloadableDependency {
 }
 
 protocol DependenciesDownloading {
-    func downloadDependencies(prefix: String, dependencies: [DownloadableDependency]) throws
+    func downloadDependencies(dependencies: [DownloadableDependency]) throws
 }
 
 struct LocalDependenciesDownloader: DependenciesDownloading {
@@ -28,16 +28,15 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
         self.pathProvider = pathProvider
     }
     
-    func downloadDependencies(prefix: String, dependencies: [DownloadableDependency]) throws {
+    func downloadDependencies(dependencies: [DownloadableDependency]) throws {
         let buildDir = pathProvider.buildDir()
         
         try? fileSystem.createDirectory(buildDir, recursive: true)
         
-        dependencies.forEach { dependency in
+        try dependencies.forEach { dependency in
             let cacheDir = pathProvider.cacheDir(
                 dependency: dependency.name,
-                version: dependency.version,
-                prefix: prefix
+                version: dependency.version
             )
             
             let cachedFiles = try fileSystem.getDirectoryContents(cacheDir)
