@@ -9,6 +9,9 @@ public protocol PathProviding {
     
     /// Directory where Torino cache is stored
     func cacheDir(dependency: String, version: String, prefix: String) -> AbsolutePath
+    
+    /// Path to Cartfile.resolved
+    func lockfile() -> AbsolutePath
 }
 
 struct PathProviderError: Error {
@@ -40,5 +43,9 @@ struct CarthagePathProvider: PathProviding {
     
     func cacheDir(dependency: String, version: String, prefix: String) -> AbsolutePath {
         _cacheDir.appending(components: prefix, dependency, version)
+    }
+    
+    func lockfile() -> AbsolutePath {
+        base.appending(components: "Cartfile.resolved")
     }
 }
