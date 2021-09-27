@@ -42,6 +42,8 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 try? fileSystem.removeFileTree(destination)
                 try fileSystem.copy(from: container.path, to: destination)
             }
+            
+            try fileSystem.copy(from: dependency.versionFile, to: dependencyDir.appending(component: dependency.versionFile.basename))
         }
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import TSCBasic
 
 public struct VersionFile: Decodable {
     public struct Framework: Decodable {
@@ -22,4 +23,5 @@ public struct VersionFile: Decodable {
 public struct VersionFileWithName {
     public let name: String
     public let versionFile: VersionFile
+    public let path: AbsolutePath
 }

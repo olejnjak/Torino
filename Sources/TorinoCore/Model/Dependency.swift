@@ -10,4 +10,5 @@ public struct Dependency {
     public let name: String
     public let version: String
     public let frameworks: [Container]
+    public let versionFile: AbsolutePath
 }

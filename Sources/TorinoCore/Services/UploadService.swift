@@ -18,6 +18,6 @@ final class UploadService {
     func run(path: AbsolutePath) throws {
         let dependencies = try dependenciesLoader.loadDependencies(at: path)
         
-        try dependenciesUploader.uploadDependencies(dependencies, prefix: "Swift-5.4.2")
+        try dependenciesUploader.uploadDependencies(dependencies, prefix: "Swift-5.5")
     }
 }

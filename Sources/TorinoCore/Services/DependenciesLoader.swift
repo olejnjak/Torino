@@ -40,7 +40,8 @@ public struct CarthageDependenciesLoader: DependenciesLoading {
                 let data = Data(bytes.contents)
                 return VersionFileWithName(
                     name: versionFilePath.name,
-                    versionFile: try jsonDecoder.decode(VersionFile.self, from: data)
+                    versionFile: try jsonDecoder.decode(VersionFile.self, from: data),
+                    path: versionFilePath.path
                 )
             }
         
@@ -50,7 +51,8 @@ public struct CarthageDependenciesLoader: DependenciesLoading {
                 version: $0.versionFile.commitish,
                 frameworks: $0.versionFile.allContainers.map {
                     .init(name: $0, path: carthageBuildDir.appending(component: $0))
-                }
+                },
+                versionFile: $0.path
             )
         }
     }
