@@ -47,6 +47,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
                 let destination = buildDir.appending(component: path)
                 let cached = cacheDir.appending(component: path)
                 
+                try? fileSystem.removeFileTree(destination)
                 try? fileSystem.copy(from: cached, to: destination)
             }
         }

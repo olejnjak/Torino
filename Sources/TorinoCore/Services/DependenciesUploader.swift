@@ -30,6 +30,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 version: dependency.version
             )
         
+            try? fileSystem.removeFileTree(dependencyDir)
             try fileSystem.createDirectory(dependencyDir, recursive: true)
             
             try dependency.frameworks.forEach { container in
