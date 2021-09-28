@@ -92,3 +92,4 @@ iOSInjectionProject/
 /.build
 /Packages
 /*.xcodeproj
+.swiftpm
