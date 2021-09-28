@@ -6,7 +6,7 @@ struct DependenciesUploadError: Error {
 }
 
 protocol DependenciesUploading {
-    func uploadDependencies(_ dependencies: [Dependency], prefix: String) throws
+    func uploadDependencies(_ dependencies: [Dependency]) throws
 }
 
 struct LocalDependenciesUploader: DependenciesUploading {
@@ -23,7 +23,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
         self.pathProvider = pathProvider
     }
     
-    func uploadDependencies(_ dependencies: [Dependency], prefix: String) throws {
+    func uploadDependencies(_ dependencies: [Dependency]) throws {
         try dependencies.forEach { dependency in
             let dependencyDir = pathProvider.cacheDir(
                 dependency: dependency.name,
