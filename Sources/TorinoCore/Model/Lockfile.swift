@@ -14,6 +14,10 @@ struct Lockfile {
                 return String(lastComponent[lastComponent.startIndex..<lastComponent.index(lastComponent.endIndex, offsetBy: -4)])
             }
             
+            if lastComponent.hasSuffix(".json") {
+                return String(lastComponent[lastComponent.startIndex..<lastComponent.index(lastComponent.endIndex, offsetBy: -5)])
+            }
+            
             return lastComponent
         }
     }
