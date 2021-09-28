@@ -1,5 +1,13 @@
 name: Run tests
-on: [push, pull_request]
+on: 
+  push:
+    paths:
+      - Sources/**
+      - Tests/**
+  pull_request:
+    paths:
+      - Sources/**
+      - Tests/**
 jobs:
   build:
     runs-on: macos-11
