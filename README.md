@@ -16,6 +16,14 @@ olejnjak/Torino@main
 
 Torino currently supports only `download` and `upload` commands that both take a single `--prefix` parameter that is used for caching binaries with correct Swift version.
 
+## Features
+
+Currently Torino supports only caching on single device which means that if you have shared dependencies (and its versions) on more projects, you don't have to compile it several times (or copy it several times), you can use Torino to do that.
+
+It is planned that in near future remote cache storage will be supported. For now the first supported remote storage should be GCP buckets.
+
+Other plans might be introducing `bootstrap` and `update` commands that could optimize calling respective [Carthage][carthage] commands to automatically reduce amount of compiled code, but this is still in phase of brainstorming pros and cons.
+
 ## Naming 
 
 If you wonder why is Torino named after this Italian 🇮🇹  city, it is quite simple. As it works on top of [Carthage 🇹🇳][carthage] and is inspired by [Rome 🇮🇹][rome] and I am a fan of Juventus FC 🖤🤍 it was quite natural to name it this way 😎
