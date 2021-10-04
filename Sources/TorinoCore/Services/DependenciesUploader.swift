@@ -41,7 +41,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 "zip", "-r",
                 cachePath.pathString,
                 dependency.versionFile.relative(to: buildDir).pathString, ";"
-            ] + paths, cwd: buildDir.asURL)
+            ] + paths, cwd: buildDir)
         }
     }
 }
@@ -50,14 +50,14 @@ struct ShellError: Error {
     let code: Int32
 }
 
-func shell(_ args: String..., cwd: URL?) throws {
+func shell(_ args: String..., cwd: AbsolutePath?) throws {
     try shell(Array(args), cwd: cwd)
 }
 
-func shell(_ args: [String], cwd: URL?) throws {
+func shell(_ args: [String], cwd: AbsolutePath?) throws {
     let task = Process()
     task.launchPath = "/usr/bin/env"
-    task.currentDirectoryURL = cwd
+    task.currentDirectoryURL = cwd?.asURL
     task.arguments = args
     task.launch()
     task.waitUntilExit()
