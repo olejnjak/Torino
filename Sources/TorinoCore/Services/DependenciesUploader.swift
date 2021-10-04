@@ -10,15 +10,18 @@ protocol DependenciesUploading {
 }
 
 struct LocalDependenciesUploader: DependenciesUploading {
+    private let archiveService: ArchiveServicing
     private let fileSystem: FileSystem
     private let pathProvider: PathProviding
     
     // MARK: - Initializers
     
     init(
+        artchiveService: ArchiveServicing = ZipService(),
         fileSystem: FileSystem = localFileSystem,
         pathProvider: PathProviding
     ) {
+        self.archiveService = artchiveService
         self.fileSystem = fileSystem
         self.pathProvider = pathProvider
     }
@@ -34,40 +37,13 @@ struct LocalDependenciesUploader: DependenciesUploading {
         
             try? fileSystem.createDirectory(cachePath.parentDirectory, recursive: true)
         
-            let paths = dependency.frameworks.map { $0.path.relative(to: buildDir).pathString }
+            let paths = dependency.frameworks.map { $0.path.relative(to: buildDir) }
             
-            do {
-                try shell([
-                    "zip", "-ruq",
-                    cachePath.pathString,
-                    dependency.versionFile.relative(to: buildDir).pathString,
-                ] + paths, cwd: buildDir)
-            } catch let error as ShellError {
-                if error.code != 12 { // zip has nothing to do
-                    throw error
-                }
-            }
+            try archiveService.archive(
+                files: paths + [dependency.versionFile.relative(to: buildDir)],
+                basePath: buildDir,
+                destination: cachePath
+            )
         }
-    }
-}
-
-struct ShellError: Error {
-    let code: Int32
-}
-
-func shell(_ args: String..., cwd: AbsolutePath?) throws {
-    try shell(Array(args), cwd: cwd)
-}
-
-func shell(_ args: [String], cwd: AbsolutePath?) throws {
-    let task = Process()
-    task.launchPath = "/usr/bin/env"
-    task.currentDirectoryURL = cwd?.asURL
-    task.arguments = args
-    task.launch()
-    task.waitUntilExit()
-    
-    if task.terminationStatus != 0 {
-        throw ShellError(code: task.terminationStatus)
     }
 }

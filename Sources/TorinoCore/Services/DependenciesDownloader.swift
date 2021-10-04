@@ -15,15 +15,18 @@ protocol DependenciesDownloading {
 }
 
 struct LocalDependenciesDownloader: DependenciesDownloading {
+    private let archiveService: ArchiveServicing
     private let fileSystem: FileSystem
     private let pathProvider: PathProviding
     
     // MARK: - Initializers
     
     init(
+        archiveService: ArchiveServicing = ZipService(),
         fileSystem: FileSystem = localFileSystem,
         pathProvider: PathProviding
     ) {
+        self.archiveService = archiveService
         self.fileSystem = fileSystem
         self.pathProvider = pathProvider
     }
@@ -41,7 +44,10 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
             
             guard fileSystem.exists(cachePath) else { return }
             
-            try shell("unzip", "-ouqq", cachePath.pathString, cwd: buildDir)
+            try archiveService.unarchive(
+                from: cachePath,
+                destination: buildDir
+            )
         }
     }
 }
