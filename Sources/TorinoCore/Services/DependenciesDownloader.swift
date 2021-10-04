@@ -15,15 +15,18 @@ protocol DependenciesDownloading {
 }
 
 struct LocalDependenciesDownloader: DependenciesDownloading {
+    private let archiveService: ArchiveServicing
     private let fileSystem: FileSystem
     private let pathProvider: PathProviding
     
     // MARK: - Initializers
     
     init(
+        archiveService: ArchiveServicing = ZipService(),
         fileSystem: FileSystem = localFileSystem,
         pathProvider: PathProviding
     ) {
+        self.archiveService = archiveService
         self.fileSystem = fileSystem
         self.pathProvider = pathProvider
     }
@@ -34,22 +37,17 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
         try? fileSystem.createDirectory(buildDir, recursive: true)
         
         try dependencies.forEach { dependency in
-            let cacheDir = pathProvider.cacheDir(
+            let cachePath = pathProvider.cacheDir(
                 dependency: dependency.name,
                 version: dependency.version
             )
             
-            guard fileSystem.exists(cacheDir) else { return }
+            guard fileSystem.exists(cachePath) else { return }
             
-            let cachedFiles = try fileSystem.getDirectoryContents(cacheDir)
-            
-            cachedFiles.forEach { path in
-                let destination = buildDir.appending(component: path)
-                let cached = cacheDir.appending(component: path)
-                
-                try? fileSystem.removeFileTree(destination)
-                try? fileSystem.copy(from: cached, to: destination)
-            }
+            try archiveService.unarchive(
+                from: cachePath,
+                destination: buildDir
+            )
         }
     }
 }

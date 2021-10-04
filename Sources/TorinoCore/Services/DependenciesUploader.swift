@@ -10,39 +10,39 @@ protocol DependenciesUploading {
 }
 
 struct LocalDependenciesUploader: DependenciesUploading {
+    private let archiveService: ArchiveServicing
     private let fileSystem: FileSystem
     private let pathProvider: PathProviding
     
     // MARK: - Initializers
     
     init(
+        artchiveService: ArchiveServicing = ZipService(),
         fileSystem: FileSystem = localFileSystem,
         pathProvider: PathProviding
     ) {
+        self.archiveService = artchiveService
         self.fileSystem = fileSystem
         self.pathProvider = pathProvider
     }
     
     func uploadDependencies(_ dependencies: [Dependency]) throws {
+        let buildDir = pathProvider.buildDir()
+        
         try dependencies.forEach { dependency in
-            let dependencyDir = pathProvider.cacheDir(
+            let cachePath = pathProvider.cacheDir(
                 dependency: dependency.name,
                 version: dependency.version
             )
         
-            try? fileSystem.removeFileTree(dependencyDir)
-            try fileSystem.createDirectory(dependencyDir, recursive: true)
+            try? fileSystem.createDirectory(cachePath.parentDirectory, recursive: true)
+        
+            let paths = dependency.frameworks.map { $0.path.relative(to: buildDir) }
             
-            try dependency.frameworks.forEach { container in
-                let destination = dependencyDir.appending(component: container.name)
-                
-                try? fileSystem.removeFileTree(destination)
-                try fileSystem.copy(from: container.path, to: destination)
-            }
-            
-            try fileSystem.copy(
-                from: dependency.versionFile,
-                to: dependencyDir.appending(component: dependency.versionFile.basename)
+            try archiveService.archive(
+                files: paths + [dependency.versionFile.relative(to: buildDir)],
+                basePath: buildDir,
+                destination: cachePath
             )
         }
     }
