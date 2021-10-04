@@ -42,7 +42,7 @@ struct CarthagePathProvider: PathProviding {
     }
     
     func cacheDir(dependency: String, version: String) -> AbsolutePath {
-        _cacheDir.appending(components: dependency, version)
+        _cacheDir.appending(component: dependency + "-" + version + ".zip")
     }
     
     func lockfile() -> AbsolutePath {

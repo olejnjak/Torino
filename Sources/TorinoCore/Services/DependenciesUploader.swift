@@ -24,26 +24,45 @@ struct LocalDependenciesUploader: DependenciesUploading {
     }
     
     func uploadDependencies(_ dependencies: [Dependency]) throws {
+        let buildDir = pathProvider.buildDir()
+        
         try dependencies.forEach { dependency in
-            let dependencyDir = pathProvider.cacheDir(
+            let cachePath = pathProvider.cacheDir(
                 dependency: dependency.name,
                 version: dependency.version
             )
         
-            try? fileSystem.removeFileTree(dependencyDir)
-            try fileSystem.createDirectory(dependencyDir, recursive: true)
+            try? fileSystem.removeFileTree(cachePath)
+            try? fileSystem.createDirectory(cachePath.parentDirectory, recursive: true)
+        
+            let paths = dependency.frameworks.map { $0.path.relative(to: buildDir).pathString }
             
-            try dependency.frameworks.forEach { container in
-                let destination = dependencyDir.appending(component: container.name)
-                
-                try? fileSystem.removeFileTree(destination)
-                try fileSystem.copy(from: container.path, to: destination)
-            }
-            
-            try fileSystem.copy(
-                from: dependency.versionFile,
-                to: dependencyDir.appending(component: dependency.versionFile.basename)
-            )
+            try shell([
+                "zip", "-r",
+                cachePath.pathString,
+                dependency.versionFile.relative(to: buildDir).pathString, ";"
+            ] + paths, cwd: buildDir.asURL)
         }
+    }
+}
+
+struct ShellError: Error {
+    let code: Int32
+}
+
+func shell(_ args: String..., cwd: URL?) throws {
+    try shell(Array(args), cwd: cwd)
+}
+
+func shell(_ args: [String], cwd: URL?) throws {
+    let task = Process()
+    task.launchPath = "/usr/bin/env"
+    task.currentDirectoryURL = cwd
+    task.arguments = args
+    task.launch()
+    task.waitUntilExit()
+    
+    if task.terminationStatus != 0 {
+        throw ShellError(code: task.terminationStatus)
     }
 }
