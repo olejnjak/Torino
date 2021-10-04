@@ -32,16 +32,21 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 version: dependency.version
             )
         
-            try? fileSystem.removeFileTree(cachePath)
             try? fileSystem.createDirectory(cachePath.parentDirectory, recursive: true)
         
             let paths = dependency.frameworks.map { $0.path.relative(to: buildDir).pathString }
             
-            try shell([
-                "zip", "-r",
-                cachePath.pathString,
-                dependency.versionFile.relative(to: buildDir).pathString, ";"
-            ] + paths, cwd: buildDir)
+            do {
+                try shell([
+                    "zip", "-ruq",
+                    cachePath.pathString,
+                    dependency.versionFile.relative(to: buildDir).pathString,
+                ] + paths, cwd: buildDir)
+            } catch let error as ShellError {
+                if error.code != 12 { // zip has nothing to do
+                    throw error
+                }
+            }
         }
     }
 }

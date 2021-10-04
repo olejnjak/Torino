@@ -41,7 +41,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
             
             guard fileSystem.exists(cachePath) else { return }
             
-            try shell("unzip", cachePath.pathString, cwd: buildDir)
+            try shell("unzip", "-ouqq", cachePath.pathString, cwd: buildDir)
         }
     }
 }
