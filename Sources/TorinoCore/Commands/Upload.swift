@@ -1,5 +1,6 @@
 import ArgumentParser
 import TSCBasic
+import GCP_Remote
 
 struct UploadError: Error {
     let message: String
@@ -20,7 +21,7 @@ struct Upload: ParsableCommand {
         
         try UploadService(
             dependenciesLoader: CarthageDependenciesLoader(pathProvider: pathProvider),
-            dependenciesUploader: LocalDependenciesUploader(pathProvider: pathProvider)
+            dependenciesUploader: LocalDependenciesUploader(pathProvider: pathProvider, gcpUploader: GCPUploader())
         ).run(path: cwd)
     }
 }
