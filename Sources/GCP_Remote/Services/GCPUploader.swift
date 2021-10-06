@@ -1,8 +1,10 @@
 import Foundation
 import TSCBasic
 
+public typealias UploadItem = (localFile: AbsolutePath, remotePath: String)
+
 public protocol GCPUploading {
-    func upload(_ file: AbsolutePath, to path: String) throws
+    func upload(items: [UploadItem]) throws
 }
 
 public struct GCPUploader: GCPUploading {
@@ -18,25 +20,43 @@ public struct GCPUploader: GCPUploading {
     
     // MARK: - Interface
     
-    public func upload(_ file: AbsolutePath, to path: String) throws {
+    public func upload(items: [UploadItem]) throws {
         let bucket = try loadBucketName()
         let sa = try loadServiceAccount()
         let token = try authAPI.fetchAccessToken(serviceAccount: sa, validFor: 60, readOnly: false)
         
-        let url = URL(string: "https://storage.googleapis.com/upload/storage/v1/b/" + bucket + "/o?uploadType=media&name=" + path)!
-        var request = URLRequest(url: url)
-        token.addToRequest(&request)
-        request.httpBody = try Data(contentsOf: file.asURL)
-        _ = try session.syncDataTask(for: request)
+        try items.forEach { localPath, remotePath in
+            var urlComponents = URLComponents(string: "https://storage.googleapis.com/upload/storage/v1/b/" + bucket + "/o")!
+            urlComponents.queryItems = [
+                .init(name: "uploadType", value: "media"),
+                .init(name: "name", value: remotePath),
+            ]
+            
+            var request = URLRequest(url: urlComponents.url!)
+            token.addToRequest(&request)
+            request.httpMethod = "POST"
+            request.httpBody = try Data(contentsOf: localPath.asURL)
+            _ = try session.syncDataTask(for: request)
+        }
     }
     
     // MARK: - Private helpers
     
     private func loadServiceAccount() throws -> ServiceAccount {
-        try JSONDecoder().decode(ServiceAccount.self, from: try Data(contentsOf: URL(fileURLWithPath: "~/.Torino/sa.json")))
+        try JSONDecoder().decode(
+            ServiceAccount.self,
+            from: try Data(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/sa.json"))
+        )
     }
     
     private func loadBucketName() throws -> String {
-        try String(contentsOf: URL(fileURLWithPath: "~/.Torino/bucket")).trimmingCharacters(in: .whitespacesAndNewlines)
+        try String(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/bucket"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+private extension URL {
+    init(fileURLExpandingTildeInPath path: String) {
+        self.init(fileURLWithPath: (path as NSString).expandingTildeInPath)
     }
 }

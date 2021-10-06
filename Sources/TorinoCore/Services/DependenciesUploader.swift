@@ -32,6 +32,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
     
     func uploadDependencies(_ dependencies: [Dependency]) throws {
         let buildDir = pathProvider.buildDir()
+        var uploadItems = [UploadItem]()
         
         try dependencies.forEach { dependency in
             let cachePath = pathProvider.cacheDir(
@@ -49,10 +50,12 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 destination: cachePath
             )
             
-            try gcpUploader.upload(cachePath, to: pathProvider.remoteCachePath(
+            uploadItems.append((cachePath, pathProvider.remoteCachePath(
                 dependency: dependency.name,
                 version: dependency.version
-            ))
+            )))
         }
+        
+        try gcpUploader.upload(items: uploadItems)
     }
 }

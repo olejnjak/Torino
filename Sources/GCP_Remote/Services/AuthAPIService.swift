@@ -33,12 +33,11 @@ public struct AuthAPIService: AuthAPIServicing {
     ) throws -> AccessToken {
         let claims = self.claims(serviceAccount: serviceAccount, validFor: interval, readOnly: readOnly)
         let jwt = self.jwt(for: serviceAccount, claims: claims)
-        let url = URL(string: "https://oauth2.googleapis.com/token")!
         let requestData = AccessTokenRequest(assertion: jwt)
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: claims.aud)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? encoder.encode(requestData)
+        request.httpBody = try encoder.encode(requestData)
         return try decoder.decode(AccessToken.self, from: try session.syncDataTask(for: request).0 ?? Data())
     }
     
@@ -48,7 +47,7 @@ public struct AuthAPIService: AuthAPIServicing {
     private func jwt(for serviceAccount: ServiceAccount, claims: GoogleClaims) -> String {
         let header = Header(typ: "JWT")
         var jwt = JWT(header: header, claims: claims)
-        let signer = JWTSigner.rs256(privateKey: serviceAccount.privateKey.data(using: .utf8)!)
+        let signer = JWTSigner.rs256(privateKey: serviceAccount.privateKey.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8)!)
         return (try? jwt.sign(using: signer)) ?? ""
     }
     
