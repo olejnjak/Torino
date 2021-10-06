@@ -4,10 +4,12 @@ on:
     paths:
       - Sources/**
       - Tests/**
+      - .github/**
   pull_request:
     paths:
       - Sources/**
       - Tests/**
+      - .github/**
 jobs:
   build:
     runs-on: macos-11
