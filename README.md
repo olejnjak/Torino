@@ -32,6 +32,13 @@ Download command has single required option `--prefix`.
 Torino download --prefix "Swift-5.5"
 ```
 
+### Remote caching
+
+Torino currently supports remote cache stored in GCP buckets. To support that you need to provide two environment variables:
+
+`TORINO_GCP_BUCKET` - name of bucket that will be used for storage
+`TORINO_GCP_SERVICE_ACCOUNT_PATH` - location of service account that will be used for access to specified bucket
+
 ## Features
 
 Currently Torino supports only caching on single device which means that if you have shared dependencies (and its versions) on more projects, you don't have to compile it several times (or copy it several times), you can use Torino to do that.
