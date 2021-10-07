@@ -24,7 +24,7 @@ struct Download: ParsableCommand {
         let lockfile = Lockfile.from(string: lockfileContent.cString)
         
         let gcpDownloader = (try? GCPConfig(environment: ProcessEnv.vars))
-            .map(GCPDownloader.init)
+            .map { GCPDownloader(config: $0) }
         
         try LocalDependenciesDownloader(gcpDownloader: gcpDownloader, pathProvider: pathProvider)
             .downloadDependencies(

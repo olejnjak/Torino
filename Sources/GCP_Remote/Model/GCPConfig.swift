@@ -16,6 +16,6 @@ public struct GCPConfig: Decodable {
     
     public init(environment: [String: String]) throws {
         let data = try JSONEncoder().encode(environment)
-        self = try JSONDecoder().decode(Self, from: data)
+        self = try JSONDecoder().decode(Self.self, from: data)
     }
 }

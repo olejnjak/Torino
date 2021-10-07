@@ -25,7 +25,7 @@ public struct GCPUploader: GCPUploading {
     public func upload(items: [UploadItem]) throws {
         guard items.count > 0 else { return }
         
-        let sa = try loadServiceAccount()
+        let sa = try loadServiceAccount(path: config.serviceAccountPath)
         let token = try authAPI.fetchAccessToken(serviceAccount: sa, validFor: 60, readOnly: false)
         
         try items.forEach { localPath, remotePath in

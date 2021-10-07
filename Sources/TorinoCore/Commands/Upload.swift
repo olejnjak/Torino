@@ -20,7 +20,7 @@ struct Upload: ParsableCommand {
         )
         
         let gcpUploader = (try? GCPConfig(environment: ProcessEnv.vars))
-            .map(GCPUploader.init)
+            .map { GCPUploader(config: $0) }
         
         try UploadService(
             dependenciesLoader: CarthageDependenciesLoader(pathProvider: pathProvider),

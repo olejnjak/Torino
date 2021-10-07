@@ -1,9 +1,9 @@
 import Foundation
 
-func loadServiceAccount() throws -> ServiceAccount {
+func loadServiceAccount(path: String) throws -> ServiceAccount {
     try JSONDecoder().decode(
         ServiceAccount.self,
-        from: try Data(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/gcp_sa.json"))
+        from: try Data(contentsOf: URL(fileURLExpandingTildeInPath: path))
     )
 }
 
