@@ -37,6 +37,7 @@ public struct GCPUploader: GCPUploading {
             
             var request = URLRequest(url: urlComponents.url!)
             token.addToRequest(&request)
+            request.setValue("application/zip", forHTTPHeaderField: "Content-Type")
             request.httpMethod = "POST"
             request.httpBody = try Data(contentsOf: localPath.asURL)
             _ = try session.syncDataTask(for: request)
