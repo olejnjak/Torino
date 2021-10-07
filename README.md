@@ -16,6 +16,22 @@ olejnjak/Torino@main
 
 Torino currently supports only `download` and `upload` commands that both take a single `--prefix` parameter that is used for caching binaries with correct Swift version.
 
+### Upload cache
+
+Upload command has single required option `--prefix`. This way you can for example distinguish between compilers that created uploaded builds. 
+
+```
+Torino upload --prefix "Swift-5.5"
+```
+
+### Download cache
+
+Download command has single required option `--prefix`.
+
+```
+Torino download --prefix "Swift-5.5"
+```
+
 ## Features
 
 Currently Torino supports only caching on single device which means that if you have shared dependencies (and its versions) on more projects, you don't have to compile it several times (or copy it several times), you can use Torino to do that.

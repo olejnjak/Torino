@@ -1,4 +1,5 @@
 import Foundation
+import GCP_Remote
 import TSCBasic
 
 struct DependenciesUploadError: Error {
@@ -13,21 +14,25 @@ struct LocalDependenciesUploader: DependenciesUploading {
     private let archiveService: ArchiveServicing
     private let fileSystem: FileSystem
     private let pathProvider: PathProviding
+    private let gcpUploader: GCPUploading?
     
     // MARK: - Initializers
     
     init(
-        artchiveService: ArchiveServicing = ZipService(),
+        archiveService: ArchiveServicing = ZipService(),
         fileSystem: FileSystem = localFileSystem,
-        pathProvider: PathProviding
+        pathProvider: PathProviding,
+        gcpUploader: GCPUploading?
     ) {
-        self.archiveService = artchiveService
+        self.archiveService = archiveService
         self.fileSystem = fileSystem
         self.pathProvider = pathProvider
+        self.gcpUploader = gcpUploader
     }
     
     func uploadDependencies(_ dependencies: [Dependency]) throws {
         let buildDir = pathProvider.buildDir()
+        var uploadItems = [UploadItem]()
         
         try dependencies.forEach { dependency in
             let cachePath = pathProvider.cacheDir(
@@ -44,6 +49,15 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 basePath: buildDir,
                 destination: cachePath
             )
+            
+            uploadItems.append((cachePath, pathProvider.remoteCachePath(
+                dependency: dependency.name,
+                version: dependency.version
+            )))
+        }
+        
+        if let gcpUploader = gcpUploader {
+            try gcpUploader.upload(items: uploadItems)
         }
     }
 }

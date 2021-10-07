@@ -1,5 +1,6 @@
 import ArgumentParser
 import TSCBasic
+import GCP_Remote
 
 struct DownloadError: Error {
     let message: String
@@ -22,7 +23,10 @@ struct Download: ParsableCommand {
         let lockfileContent = try localFileSystem.readFileContents(lockfilePath)
         let lockfile = Lockfile.from(string: lockfileContent.cString)
         
-        try LocalDependenciesDownloader(pathProvider: pathProvider)
+        let gcpDownloader = (try? GCPConfig(environment: ProcessEnv.vars))
+            .map { GCPDownloader(config: $0) }
+        
+        try LocalDependenciesDownloader(gcpDownloader: gcpDownloader, pathProvider: pathProvider)
             .downloadDependencies(
                 dependencies: lockfile.dependencies.map {
                     DownloadableDependency(name: $0.name, version: $0.version)

@@ -12,6 +12,8 @@ public protocol PathProviding {
     
     /// Path to Cartfile.resolved
     func lockfile() -> AbsolutePath
+    
+    func remoteCachePath(dependency: String, version: String) -> String
 }
 
 struct PathProviderError: Error {
@@ -21,6 +23,7 @@ struct PathProviderError: Error {
 struct CarthagePathProvider: PathProviding {
     private let base: AbsolutePath
     private let _cacheDir: AbsolutePath
+    private let prefix: String
     
     // MARK: - Initializers
     
@@ -35,6 +38,7 @@ struct CarthagePathProvider: PathProviding {
         
         _cacheDir = cachesDirectory.appending(components: "Torino", prefix)
         self.base = base
+        self.prefix = prefix
     }
     
     func buildDir() -> AbsolutePath {
@@ -47,5 +51,13 @@ struct CarthagePathProvider: PathProviding {
     
     func lockfile() -> AbsolutePath {
         base.appending(components: "Cartfile.resolved")
+    }
+    
+    func remoteCachePath(dependency: String, version: String) -> String {
+        [
+            prefix,
+            cacheDir(dependency: dependency, version: version).basename
+        ].filter { $0.count > 0 }
+        .joined(separator: "/")
     }
 }

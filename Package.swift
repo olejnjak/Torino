@@ -19,6 +19,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", .branch("main")),
         .package(url: "https://github.com/apple/swift-tools-support-core", .upToNextMajor(from: "0.2.0")),
+        .package(url: "https://github.com/IBM-Swift/Swift-JWT", .upToNextMajor(from: "3.6.1")),
     ],
     targets: [
         .executableTarget(
@@ -28,6 +29,7 @@ let package = Package(
         .target(
             name: "TorinoCore",
             dependencies: [
+                "GCP_Remote",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
             ]
@@ -35,6 +37,13 @@ let package = Package(
         .testTarget(
             name: "TorinoCoreTests",
             dependencies: ["TorinoCore"]
+        ),
+        .target(
+            name: "GCP_Remote",
+            dependencies: [
+                .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
+                .product(name: "SwiftJWT", package: "Swift-JWT"),
+            ]
         ),
     ]
 )
