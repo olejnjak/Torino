@@ -14,7 +14,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
     private let archiveService: ArchiveServicing
     private let fileSystem: FileSystem
     private let pathProvider: PathProviding
-    private let gcpUploader: GCPUploading
+    private let gcpUploader: GCPUploading?
     
     // MARK: - Initializers
     
@@ -22,7 +22,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
         archiveService: ArchiveServicing = ZipService(),
         fileSystem: FileSystem = localFileSystem,
         pathProvider: PathProviding,
-        gcpUploader: GCPUploading
+        gcpUploader: GCPUploading?
     ) {
         self.archiveService = archiveService
         self.fileSystem = fileSystem
@@ -56,6 +56,8 @@ struct LocalDependenciesUploader: DependenciesUploading {
             )))
         }
         
-        try gcpUploader.upload(items: uploadItems)
+        if let gcpUploader = gcpUploader {
+            try gcpUploader.upload(items: uploadItems)
+        }
     }
 }

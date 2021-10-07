@@ -18,7 +18,7 @@ protocol DependenciesDownloading {
 struct LocalDependenciesDownloader: DependenciesDownloading {
     private let archiveService: ArchiveServicing
     private let fileSystem: FileSystem
-    private let gcpDownloader: GCPDownloading
+    private let gcpDownloader: GCPDownloading?
     private let pathProvider: PathProviding
     
     // MARK: - Initializers
@@ -26,7 +26,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
     init(
         archiveService: ArchiveServicing = ZipService(),
         fileSystem: FileSystem = localFileSystem,
-        gcpDownloader: GCPDownloading = GCPDownloader(),
+        gcpDownloader: GCPDownloading?,
         pathProvider: PathProviding
     ) {
         self.archiveService = archiveService
@@ -73,6 +73,10 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
     }
     
     private func downloadMissingDependencies(_ missingDependencies: [DownloadableDependency]) throws {
+        guard let gcpDownloader = gcpDownloader else {
+            return
+        }
+        
         let downloadItems = missingDependencies.map { dependency in
             DownloadItem(
                 remotePath: pathProvider.remoteCachePath(dependency: dependency.name, version: dependency.version),

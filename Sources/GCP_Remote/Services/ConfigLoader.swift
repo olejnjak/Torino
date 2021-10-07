@@ -3,13 +3,8 @@ import Foundation
 func loadServiceAccount() throws -> ServiceAccount {
     try JSONDecoder().decode(
         ServiceAccount.self,
-        from: try Data(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/sa.json"))
+        from: try Data(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/gcp_sa.json"))
     )
-}
-
-func loadBucketName() throws -> String {
-    try String(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/bucket"))
-        .trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
 private extension URL {
