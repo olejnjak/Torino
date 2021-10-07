@@ -21,6 +21,8 @@ public struct GCPUploader: GCPUploading {
     // MARK: - Public nterface
     
     public func upload(items: [UploadItem]) throws {
+        guard items.count > 0 else { return }
+        
         let bucket = try loadBucketName()
         let sa = try loadServiceAccount()
         let token = try authAPI.fetchAccessToken(serviceAccount: sa, validFor: 60, readOnly: false)
