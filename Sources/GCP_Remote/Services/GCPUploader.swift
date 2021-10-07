@@ -18,7 +18,7 @@ public struct GCPUploader: GCPUploading {
         self.session = session
     }
     
-    // MARK: - Interface
+    // MARK: - Public nterface
     
     public func upload(items: [UploadItem]) throws {
         let bucket = try loadBucketName()
@@ -38,25 +38,5 @@ public struct GCPUploader: GCPUploading {
             request.httpBody = try Data(contentsOf: localPath.asURL)
             _ = try session.syncDataTask(for: request)
         }
-    }
-    
-    // MARK: - Private helpers
-    
-    private func loadServiceAccount() throws -> ServiceAccount {
-        try JSONDecoder().decode(
-            ServiceAccount.self,
-            from: try Data(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/sa.json"))
-        )
-    }
-    
-    private func loadBucketName() throws -> String {
-        try String(contentsOf: URL(fileURLExpandingTildeInPath: "~/.Torino/bucket"))
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}
-
-private extension URL {
-    init(fileURLExpandingTildeInPath path: String) {
-        self.init(fileURLWithPath: (path as NSString).expandingTildeInPath)
     }
 }
