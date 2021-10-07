@@ -54,6 +54,10 @@ struct CarthagePathProvider: PathProviding {
     }
     
     func remoteCachePath(dependency: String, version: String) -> String {
-        prefix + "/" + cacheDir(dependency: dependency, version: version).basename
+        [
+            prefix,
+            cacheDir(dependency: dependency, version: version).basename
+        ].filter { $0.count > 0 }
+        .joined(separator: "/")
     }
 }
