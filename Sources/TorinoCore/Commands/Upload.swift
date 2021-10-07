@@ -19,12 +19,8 @@ struct Upload: ParsableCommand {
             prefix: prefix
         )
         
-        let gcpUploader: GCPUploading? = {
-            if let bucket = ProcessEnv.vars["TORINO_GCP_BUCKET"], bucket.count > 0 {
-                return GCPUploader(config: .init(bucket: bucket))
-            }
-            return nil
-        }()
+        let gcpUploader = (try? GCPConfig(environment: ProcessEnv.vars))
+            .map(GCPUploader.init)
         
         try UploadService(
             dependenciesLoader: CarthageDependenciesLoader(pathProvider: pathProvider),

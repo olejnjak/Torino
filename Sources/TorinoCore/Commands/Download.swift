@@ -23,12 +23,8 @@ struct Download: ParsableCommand {
         let lockfileContent = try localFileSystem.readFileContents(lockfilePath)
         let lockfile = Lockfile.from(string: lockfileContent.cString)
         
-        let gcpDownloader: GCPDownloading? = {
-            if let bucket = ProcessEnv.vars["TORINO_GCP_BUCKET"], bucket.count > 0 {
-                return GCPDownloader(config: .init(bucket: bucket))
-            }
-            return nil
-        }()
+        let gcpDownloader = (try? GCPConfig(environment: ProcessEnv.vars))
+            .map(GCPDownloader.init)
         
         try LocalDependenciesDownloader(gcpDownloader: gcpDownloader, pathProvider: pathProvider)
             .downloadDependencies(
