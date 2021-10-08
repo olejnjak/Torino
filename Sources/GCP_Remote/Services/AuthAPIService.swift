@@ -1,5 +1,5 @@
 import Foundation
-import SwiftJWT
+import JWTKit
 
 /// Protocol wrapping a service that fetches an access token from further communication
 public protocol AuthAPIServicing {
@@ -36,7 +36,7 @@ public struct AuthAPIService: AuthAPIServicing {
         readOnly: Bool
     ) throws -> AccessToken {
         let claims = self.claims(serviceAccount: serviceAccount, validFor: interval, readOnly: readOnly)
-        let jwt = self.jwt(for: serviceAccount, claims: claims)
+        let jwt = try self.jwt(for: serviceAccount, claims: claims)
         let requestData = AccessTokenRequest(assertion: jwt)
         var request = URLRequest(url: claims.aud)
         request.httpMethod = "POST"
@@ -48,11 +48,10 @@ public struct AuthAPIService: AuthAPIServicing {
     // MARK: - Private helpers
     
     /// Create JWT token that will be sent to retrieve access token
-    private func jwt(for serviceAccount: ServiceAccount, claims: GoogleClaims) -> String {
-        let header = Header(typ: "JWT")
-        var jwt = JWT(header: header, claims: claims)
-        let signer = JWTSigner.rs256(privateKey: serviceAccount.privateKey.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8)!)
-        return (try? jwt.sign(using: signer)) ?? ""
+    private func jwt(for serviceAccount: ServiceAccount, claims: GoogleClaims) throws -> String {
+        let signers = JWTSigners()
+        try signers.use(.rs256(key: .private(pem: serviceAccount.privateKey)))
+        return try signers.sign(claims)
     }
     
     private func claims(serviceAccount sa: ServiceAccount, validFor interval: TimeInterval, readOnly: Bool) -> GoogleClaims {
