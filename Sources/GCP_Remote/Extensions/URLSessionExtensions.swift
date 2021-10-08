@@ -1,6 +1,8 @@
 import Foundation
 
 extension URLSession {
+    static let torino = URLSession(configuration: .ephemeral)
+    
     func syncDataTask(for request: URLRequest) throws -> (Data?, URLResponse?) {
         let semaphore = DispatchSemaphore(value: 0)
         

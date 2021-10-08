@@ -17,7 +17,15 @@ public struct GCPDownloader: GCPDownloading {
     
     public init(
         authAPI: AuthAPIServicing = AuthAPIService(),
-        session: URLSession = .shared,
+        fileSystem: FileSystem = localFileSystem,
+        config: GCPConfig
+    ) {
+        self.init(authAPI: authAPI, session: .torino, fileSystem: fileSystem, config: config)
+    }
+    
+    public init(
+        authAPI: AuthAPIServicing = AuthAPIService(),
+        session: URLSession,
         fileSystem: FileSystem = localFileSystem,
         config: GCPConfig
     ) {

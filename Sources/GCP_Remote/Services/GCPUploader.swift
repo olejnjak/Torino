@@ -14,7 +14,18 @@ public struct GCPUploader: GCPUploading {
     
     // MARK: - Initializers
     
-    public init(authAPI: AuthAPIServicing = AuthAPIService(), session: URLSession = .shared, config: GCPConfig) {
+    public init(
+        authAPI: AuthAPIServicing = AuthAPIService(),
+        config: GCPConfig
+    ) {
+        self.init(authAPI: authAPI, session: .torino, config: config)
+    }
+    
+    public init(
+        authAPI: AuthAPIServicing = AuthAPIService(),
+        session: URLSession,
+        config: GCPConfig
+    ) {
         self.authAPI = authAPI
         self.session = session
         self.config = config

@@ -19,7 +19,11 @@ public struct AuthAPIService: AuthAPIServicing {
     
     // MARK: - Initializers
     
-    public init(session: URLSession = .shared) {
+    public init() {
+        self.init(session: .torino)
+    }
+    
+    public init(session: URLSession) {
         self.session = session
     }
     
@@ -51,12 +55,9 @@ public struct AuthAPIService: AuthAPIServicing {
         return (try? jwt.sign(using: signer)) ?? ""
     }
     
-    private func claims(serviceAccount: ServiceAccount, validFor interval: TimeInterval, readOnly: Bool) -> GoogleClaims {
+    private func claims(serviceAccount sa: ServiceAccount, validFor interval: TimeInterval, readOnly: Bool) -> GoogleClaims {
         let now = Int(Date().timeIntervalSince1970)
-        
-        if readOnly {
-            return GoogleClaims.readOnly(iss: serviceAccount.clientEmail, exp: now + Int(interval), iat: now)
-        }
-        return GoogleClaims.readWrite(iss: serviceAccount.clientEmail, exp: now + Int(interval), iat: now)
+
+        return .init(serviceAccount: sa, scope: readOnly ? .readOnly : .readWrite, exp: now + Int(interval), iat: now)
     }
 }
