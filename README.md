@@ -36,7 +36,7 @@ Torino download --prefix "Swift-5.5"
 
 Torino currently supports remote cache stored in GCP buckets. To support that you need to provide two environment variables:
 
-`TORINO_GCP_BUCKET` - name of bucket that will be used for storage
+`TORINO_GCP_BUCKET` - name of bucket that will be used for storage<br>
 `TORINO_GCP_SERVICE_ACCOUNT_PATH` - location of service account that will be used for access to specified bucket
 
 ## Features
