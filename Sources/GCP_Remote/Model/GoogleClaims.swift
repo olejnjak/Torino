@@ -1,8 +1,8 @@
 import Foundation
-import SwiftJWT
+import JWTKit
 
 /// Struct that is used for generating second part of JWT token
-struct GoogleClaims: Claims {
+struct GoogleClaims: JWTPayload {
     enum Scope: String, Codable {
         case readOnly = "https://www.googleapis.com/auth/devstorage.read_only"
         case readWrite = "https://www.googleapis.com/auth/devstorage.read_write"
@@ -27,5 +27,9 @@ struct GoogleClaims: Claims {
 extension GoogleClaims {
     init(serviceAccount: ServiceAccount, scope: Scope, exp: Int, iat: Int) {
         self.init(iss: serviceAccount.clientEmail, scope: scope, aud: serviceAccount.tokenURL, exp: exp, iat: iat)
+    }
+
+    func verify(using signer: JWTSigner) throws {
+        try ExpirationClaim(value: Date(timeIntervalSince1970: TimeInterval(exp))).verifyNotExpired()
     }
 }
