@@ -7,7 +7,7 @@ struct UploadError: Error {
 }
 
 struct Upload: ParsableCommand {
-    @Option var prefix: String
+    @OptionGroup var args: SharedArguments
     
     func run() throws {
         guard let cwd = localFileSystem.currentWorkingDirectory else {
@@ -16,7 +16,7 @@ struct Upload: ParsableCommand {
         
         let pathProvider = try CarthagePathProvider(
             base: cwd,
-            prefix: prefix
+            prefix: args.prefix
         )
         
         let gcpUploader = (try? GCPConfig(environment: ProcessEnv.vars))
