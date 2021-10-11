@@ -8,6 +8,12 @@ protocol CarthageControlling {
 struct CarthageController: CarthageControlling {
     private let system: Systeming
     
+    // MARK: - Initializers
+    
+    init(system: Systeming = System.shared) {
+        self.system = system
+    }
+    
     // MARK: - Interface
     
     func bootstrap(_ args: CarthageArguments) throws {
