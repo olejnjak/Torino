@@ -7,8 +7,12 @@ protocol ArchiveServicing {
 }
 
 final class ZipService: ArchiveServicing {
-    private struct ShellError: Error {
-        let code: Int32
+    private let system: Systeming
+    
+    // MARK: - Initializers
+    
+    init(system: Systeming) {
+        self.system = system
     }
     
     // MARK: - Public interface
@@ -22,7 +26,7 @@ final class ZipService: ArchiveServicing {
                 ] + files.map(\.pathString),
                 cwd: basePath
             )
-        } catch let error as ShellError {
+        } catch let error as SystemError {
             if error.code != 12 { // zip has nothing to do
                 throw error
             }
@@ -36,16 +40,6 @@ final class ZipService: ArchiveServicing {
     // MARK: - Private helpers
 
     private func shell(_ args: [String], cwd: AbsolutePath? = nil) throws {
-        let task = Process()
-        task.launchPath = "/usr/bin/env"
-        task.currentDirectoryURL = cwd?.asURL
-        task.arguments = args
-        task.launch()
-        task.waitUntilExit()
-        
-        if task.terminationStatus != 0 {
-            throw ShellError(code: task.terminationStatus)
-        }
+        try system.run(args, cwd: cwd)
     }
-
 }
