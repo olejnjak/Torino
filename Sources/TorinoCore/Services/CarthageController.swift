@@ -1,8 +1,9 @@
 import Foundation
 
 protocol CarthageControlling {
+    func build(_ args: CarthageArguments) throws
     func bootstrap(_ args: CarthageArguments) throws
-    func update(args: CarthageArguments) throws
+    func update(_ args: CarthageArguments, noBuild: Bool) throws
 }
 
 struct CarthageController: CarthageControlling {
@@ -17,16 +18,24 @@ struct CarthageController: CarthageControlling {
     // MARK: - Interface
     
     func bootstrap(_ args: CarthageArguments) throws {
-        try buildCommand(command: "bootstrap", args: args)
+        try buildUsing(command: "bootstrap", args: args)
     }
     
-    func update(args: CarthageArguments) throws {
-        try buildCommand(command: "update", args: args)
+    func update(_ args: CarthageArguments, noBuild: Bool) throws {
+        if noBuild {
+            try system.run("carthage", "update", "--no-build")
+        } else {
+            try buildUsing(command: "update", args: args)
+        }
+    }
+    
+    func build(_ args: CarthageArguments) throws {
+        try buildUsing(command: "build", args: args)
     }
     
     // MARK: - Private helpers
     
-    private func buildCommand(command: String, args: CarthageArguments) throws {
+    private func buildUsing(command: String, args: CarthageArguments) throws {
         var command = [
             "carthage", command, "--cache-builds", "--use-xcframeworks",
         ]
