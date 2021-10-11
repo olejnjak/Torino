@@ -22,14 +22,23 @@ struct AutoPrefixService: AutoPrefixServicing {
     func autoPrefix() throws -> String {
         let swiftVersion = try system.run("swift", "-version")
         
-        let regex = try NSRegularExpression(pattern: #"Swift Version ([0-9]+\.[0-9]+(\.[0-9]+)?"#)
+        let regex = try NSRegularExpression(
+            pattern: #"Swift Version ([0-9]+\.[0-9]+(\.[0-9]+)?)"#,
+            options: .caseInsensitive
+        )
         let results = regex.matches(
             in: swiftVersion,
             range: NSRange(swiftVersion.startIndex..., in: swiftVersion)
         )
         
         if let result = results.first {
-            return "Swift-" + (swiftVersion as NSString).substring(with: result.range)
+            for rangeIndex in 0..<result.numberOfRanges {
+                let matchRange = result.range(at: rangeIndex)
+                
+                if matchRange == result.range { continue }
+                
+                return "Swift-" + (swiftVersion as NSString).substring(with: matchRange)
+            }
         }
         
         throw AutoPrefixError()
