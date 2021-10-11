@@ -2,15 +2,18 @@ import Foundation
 import TSCBasic
 
 protocol Systeming {
-    func run(_ arguments: [String], cwd: AbsolutePath?) throws
+    @discardableResult
+    func run(_ arguments: [String], cwd: AbsolutePath?) throws -> String
 }
 
 extension Systeming {
-    func run(_ arguments: String..., cwd: AbsolutePath? = nil) throws {
+    @discardableResult
+    func run(_ arguments: String..., cwd: AbsolutePath? = nil) throws -> String {
         try run(Array(arguments), cwd: cwd)
     }
     
-    func run(_ arguments: [String]) throws {
+    @discardableResult
+    func run(_ arguments: [String]) throws -> String {
         try run(arguments, cwd: nil)
     }
 }
@@ -26,16 +29,30 @@ struct System: Systeming {
         
     }
     
-    func run(_ args: [String], cwd: AbsolutePath?) throws {
-        let task = Process()
-        task.launchPath = "/usr/bin/env"
-        task.currentDirectoryURL = cwd?.asURL
-        task.arguments = args
-        task.launch()
-        task.waitUntilExit()
+    @discardableResult
+    func run(_ args: [String], cwd: AbsolutePath?) throws -> String {
+        let task: TSCBasic.Process = {
+            if let cwd = cwd {
+                return Process(
+                    arguments: args,
+                    workingDirectory: cwd,
+                    outputRedirection: .collect
+                )
+            }
+            return Process(arguments: args)
+        }()
         
-        if task.terminationStatus != 0 {
-            throw SystemError(code: task.terminationStatus)
+        try task.launch()
+        let result = try task.waitUntilExit()
+        
+        switch result.exitStatus {
+        case .signalled(signal: let signal):
+            // Don't care about code/signal
+            throw SystemError(code: signal)
+        case .terminated(code: let code) where code != 0:
+            throw SystemError(code: code)
+        case .terminated:
+            return try result.utf8Output()
         }
     }
 }

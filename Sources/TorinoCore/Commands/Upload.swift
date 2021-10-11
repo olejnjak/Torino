@@ -16,7 +16,7 @@ struct Upload: ParsableCommand {
         
         let pathProvider = try CarthagePathProvider(
             base: cwd,
-            prefix: args.prefix
+            prefix: try args.prefix ?? AutoPrefixService().autoPrefix()
         )
         
         let gcpUploader = (try? GCPConfig(environment: ProcessEnv.vars))

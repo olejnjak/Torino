@@ -16,7 +16,7 @@ struct Download: ParsableCommand {
         
         let pathProvider = try CarthagePathProvider(
             base: cwd,
-            prefix: args.prefix
+            prefix: try args.prefix ?? AutoPrefixService().autoPrefix()
         )
         
         let lockfilePath = pathProvider.lockfile()
