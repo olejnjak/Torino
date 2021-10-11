@@ -7,7 +7,7 @@ struct DownloadError: Error {
 }
 
 struct Download: ParsableCommand {
-    @Option var prefix: String
+    @OptionGroup var args: SharedArguments
     
     func run() throws {
         guard let cwd = localFileSystem.currentWorkingDirectory else {
@@ -16,7 +16,7 @@ struct Download: ParsableCommand {
         
         let pathProvider = try CarthagePathProvider(
             base: cwd,
-            prefix: prefix
+            prefix: args.prefix
         )
         
         let lockfilePath = pathProvider.lockfile()

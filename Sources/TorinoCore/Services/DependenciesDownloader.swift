@@ -24,7 +24,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
     // MARK: - Initializers
     
     init(
-        archiveService: ArchiveServicing = ZipService(),
+        archiveService: ArchiveServicing = ZipService(system: System.shared),
         fileSystem: FileSystem = localFileSystem,
         gcpDownloader: GCPDownloading?,
         pathProvider: PathProviding
@@ -44,7 +44,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
         try? downloadMissingDependencies(missingDependencies)
         try? fileSystem.createDirectory(buildDir, recursive: true)
         
-        try dependencies.forEach { dependency in
+        dependencies.forEach { dependency in
             let cachePath = pathProvider.cacheDir(
                 dependency: dependency.name,
                 version: dependency.version
@@ -52,7 +52,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
             
             guard fileSystem.exists(cachePath) else { return }
             
-            try archiveService.unarchive(
+            try? archiveService.unarchive(
                 from: cachePath,
                 destination: buildDir
             )
