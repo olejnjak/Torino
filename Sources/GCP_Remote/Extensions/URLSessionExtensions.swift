@@ -1,5 +1,10 @@
 import Foundation
 
+struct RequestError: Error {
+    let response: URLResponse?
+    let data: Data?
+}
+
 extension URLSession {
     static let torino = URLSession(configuration: .ephemeral)
     
@@ -24,6 +29,11 @@ extension URLSession {
             throw error
         }
         
-        return (resultData, resultResponse)
+        if let httpResponse = (resultResponse as? HTTPURLResponse),
+           (200...299).contains(httpResponse.statusCode) {
+            return (resultData, resultResponse)
+        }
+        
+        throw RequestError(response: resultResponse, data: resultData)
     }
 }
