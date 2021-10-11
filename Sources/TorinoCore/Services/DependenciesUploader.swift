@@ -19,7 +19,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
     // MARK: - Initializers
     
     init(
-        archiveService: ArchiveServicing = ZipService(),
+        archiveService: ArchiveServicing = ZipService(system: System.shared),
         fileSystem: FileSystem = localFileSystem,
         pathProvider: PathProviding,
         gcpUploader: GCPUploading?

@@ -24,7 +24,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
     // MARK: - Initializers
     
     init(
-        archiveService: ArchiveServicing = ZipService(),
+        archiveService: ArchiveServicing = ZipService(system: System.shared),
         fileSystem: FileSystem = localFileSystem,
         gcpDownloader: GCPDownloading?,
         pathProvider: PathProviding
