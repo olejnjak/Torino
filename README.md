@@ -14,7 +14,7 @@ olejnjak/Torino@main
 
 ## Usage
 
-Torino currently supports only `download` and `upload` commands that both take a single `--prefix` parameter that is used for caching binaries with correct Swift version.
+Torino currently supports several commands that all take `--prefix` parameter that is used for caching binaries with correct Swift version. This parameter is optional and if ommited, Torino will try to get appropriate prefix for you, based on selected swift version (`swift -version`).
 
 ### Upload cache
 
