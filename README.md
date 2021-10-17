@@ -18,7 +18,7 @@ Torino currently supports several commands that all take `--prefix` parameter th
 
 ### Upload cache
 
-Upload command has single required option `--prefix`. This way you can for example distinguish between compilers that created uploaded builds. 
+Upload command has single option `--prefix`. This way you can for example distinguish between compilers that created uploaded builds. 
 
 ```
 Torino upload --prefix "Swift-5.5"
@@ -26,7 +26,7 @@ Torino upload --prefix "Swift-5.5"
 
 ### Download cache
 
-Download command has single required option `--prefix`.
+Download command has single option `--prefix`.
 
 ```
 Torino download --prefix "Swift-5.5"
@@ -54,14 +54,6 @@ Torino currently supports remote cache stored in GCP buckets. To support that yo
 
 `TORINO_GCP_BUCKET` - name of bucket that will be used for storage<br>
 `TORINO_GCP_SERVICE_ACCOUNT_PATH` - location of service account that will be used for access to specified bucket
-
-## Features
-
-Currently Torino supports only caching on single device which means that if you have shared dependencies (and its versions) on more projects, you don't have to compile it several times (or copy it several times), you can use Torino to do that.
-
-It is planned that in near future remote cache storage will be supported. For now the first supported remote storage should be GCP buckets.
-
-Other plans might be introducing `bootstrap` and `update` commands that could optimize calling respective [Carthage][carthage] commands to automatically reduce amount of compiled code, but this is still in phase of brainstorming pros and cons.
 
 ## Naming 
 
