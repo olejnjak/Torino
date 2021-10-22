@@ -43,7 +43,7 @@ public struct GCPDownloader: GCPDownloading {
         let sa = try loadServiceAccount(path: config.serviceAccountPath)
         let token = try authAPI.fetchAccessToken(serviceAccount: sa, validFor: 60, readOnly: false)
         
-        try items.forEach { remotePath, localPath in
+        items.forEach { remotePath, localPath in
             let object = remotePath.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
             var urlComponents = URLComponents(string: "https://storage.googleapis.com/download/storage/v1/b/" + config.bucket + "/o/" + object)!
             urlComponents.queryItems = [
@@ -54,10 +54,10 @@ public struct GCPDownloader: GCPDownloading {
             token.addToRequest(&request)
             request.httpMethod = "GET"
             
-            let data = try session.syncDataTask(for: request).0
+            let data = try? session.syncDataTask(for: request).0
             
             try? fileSystem.createDirectory(localPath.parentDirectory, recursive: true)
-            try data?.write(to: localPath.asURL)
+            try? data?.write(to: localPath.asURL)
         }
     }
 }
