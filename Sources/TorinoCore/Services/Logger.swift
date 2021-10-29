@@ -27,4 +27,12 @@ struct Logger: Logging {
                 .joined(separator: " ")
         )
     }
+    
+    func error(_ error: String...) {
+        print(
+            "[ERROR]",
+            error.map { $0.trimmingCharacters(in: .newlines) }
+                .joined(separator: " ")
+        )
+    }
 }
