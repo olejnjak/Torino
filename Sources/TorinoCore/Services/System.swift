@@ -3,18 +3,18 @@ import TSCBasic
 
 protocol Systeming {
     @discardableResult
-    func run(_ arguments: [String], cwd: AbsolutePath?) throws -> String
+    func run(_ arguments: [String], cwd: AbsolutePath?, suppressOutput: Bool) throws -> String
 }
 
 extension Systeming {
     @discardableResult
-    func run(_ arguments: String..., cwd: AbsolutePath? = nil) throws -> String {
-        try run(Array(arguments), cwd: cwd)
+    func run(_ arguments: String..., cwd: AbsolutePath? = nil, suppressOutput: Bool = false) throws -> String {
+        try run(Array(arguments), cwd: cwd, suppressOutput: suppressOutput)
     }
     
     @discardableResult
     func run(_ arguments: [String]) throws -> String {
-        try run(arguments, cwd: nil)
+        try run(arguments, cwd: nil, suppressOutput: false)
     }
 }
 
@@ -23,20 +23,32 @@ struct SystemError: Error {
 }
 
 struct System: Systeming {
-    static let shared = System()
+    static let shared = System(logger: Logger.shared)
     
-    private init() {
-        
+    private init(logger: Logging) {
+        self.logger = logger
     }
     
+    private let logger: Logging
+    
     @discardableResult
-    func run(_ args: [String], cwd: AbsolutePath?) throws -> String {
+    func run(_ args: [String], cwd: AbsolutePath?, suppressOutput: Bool) throws -> String {
+        var stdout = ""
+        
         let task: TSCBasic.Process = {
             if let cwd = cwd {
                 return Process(
                     arguments: args,
                     workingDirectory: cwd,
-                    outputRedirection: .collect
+                    outputRedirection: .stream(stdout: { output in
+                        let newOutput = String(decoding: output, as: Unicode.UTF8.self)
+                        
+                        stdout += newOutput
+                        
+                        if !suppressOutput {
+                            logger.logStdout(newOutput)
+                        }
+                    }, stderr: { _ in }, redirectStderr: false)
                 )
             }
             return Process(arguments: args)
@@ -52,7 +64,7 @@ struct System: Systeming {
         case .terminated(code: let code) where code != 0:
             throw SystemError(code: code)
         case .terminated:
-            return try result.utf8Output()
+            return stdout
         }
     }
 }
