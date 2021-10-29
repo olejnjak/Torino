@@ -40,6 +40,6 @@ final class ZipService: ArchiveServicing {
     // MARK: - Private helpers
 
     private func shell(_ args: [String], cwd: AbsolutePath? = nil) throws {
-        try system.run(args, cwd: cwd)
+        try system.run(args, cwd: cwd, suppressOutput: true)
     }
 }
