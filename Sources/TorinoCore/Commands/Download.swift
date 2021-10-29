@@ -38,7 +38,7 @@ struct Download: ParsableCommand {
             return nil
         }()
         
-        logger.info("Trying to download cached dependencies with prefix ", prefix)
+        logger.info("Trying to download cached dependencies with prefix", prefix)
         try LocalDependenciesDownloader(gcpDownloader: gcpDownloader, pathProvider: pathProvider)
             .downloadDependencies(
                 dependencies: lockfile.dependencies.map {
