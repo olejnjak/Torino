@@ -8,11 +8,16 @@ protocol CarthageControlling {
 
 struct CarthageController: CarthageControlling {
     private let system: Systeming
+    private let logger: Logging
     
     // MARK: - Initializers
     
-    init(system: Systeming = System.shared) {
+    init(
+        system: Systeming = System.shared,
+        logger: Logging = Logger.shared
+    ) {
         self.system = system
+        self.logger = logger
     }
     
     // MARK: - Interface
@@ -23,6 +28,7 @@ struct CarthageController: CarthageControlling {
     
     func update(_ args: CarthageArguments, noBuild: Bool) throws {
         if noBuild {
+            logger.info("Updating Carthage dependencies without building")
             try system.run("carthage", "update", "--no-build")
         } else {
             try buildUsing(command: "update", args: args)
@@ -44,6 +50,7 @@ struct CarthageController: CarthageControlling {
             command += ["--platform", platform]
         }
         
+        logger.info("Running `\(command.joined(separator: " "))`")
         try system.run(command)
     }
 }
