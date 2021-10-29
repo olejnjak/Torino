@@ -36,22 +36,27 @@ struct System: Systeming {
         var stdout = ""
         
         let task: TSCBasic.Process = {
+            let outputRedirection: TSCBasic.Process.OutputRedirection = .stream(stdout: { output in
+                let newOutput = String(decoding: output, as: Unicode.UTF8.self)
+                
+                stdout += newOutput
+                
+                if !suppressOutput {
+                    logger.logStdout(newOutput)
+                }
+            }, stderr: { _ in }, redirectStderr: false)
+            
             if let cwd = cwd {
                 return Process(
                     arguments: args,
                     workingDirectory: cwd,
-                    outputRedirection: .stream(stdout: { output in
-                        let newOutput = String(decoding: output, as: Unicode.UTF8.self)
-                        
-                        stdout += newOutput
-                        
-                        if !suppressOutput {
-                            logger.logStdout(newOutput)
-                        }
-                    }, stderr: { _ in }, redirectStderr: false)
+                    outputRedirection: outputRedirection
                 )
             }
-            return Process(arguments: args)
+            return Process(
+                arguments: args,
+                outputRedirection: outputRedirection
+            )
         }()
         
         try task.launch()

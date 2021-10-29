@@ -13,10 +13,18 @@ struct Logger: Logging {
     }
     
     func logStdout(_ output: String...) {
-        print("[OUTPUT]", output)
+        print(
+            "[OUTPUT]",
+            output.map { $0.trimmingCharacters(in: .newlines) }
+                .joined(separator: " ")
+        )
     }
     
     func info(_ info: String...) {
-        print("[INFO]", info)
+        print(
+            "[INFO]",
+            info.map { $0.trimmingCharacters(in: .newlines) }
+                .joined(separator: " ")
+        )
     }
 }
