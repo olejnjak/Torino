@@ -34,7 +34,7 @@ final class ZipService: ArchiveServicing {
     }
     
     func unarchive(from path: AbsolutePath, destination: AbsolutePath) throws {
-        try shell(["unzip", "-ouqq", path.pathString], cwd: destination)
+        try shell(["unzip", "-oqq", path.pathString], cwd: destination)
     }
     
     // MARK: - Private helpers
