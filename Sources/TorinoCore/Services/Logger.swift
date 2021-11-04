@@ -28,7 +28,7 @@ struct Logger: Logging {
     private func print<Stream: TextOutputStream>(type: String, output: [String], to stream: inout Stream) {
         Swift.print(
             type,
-            output.map { $0.trimmingCharacters(in: .newlines).replacingOccurrences(of: "\n", with: "\n" + type) }
+            output.map { $0.trimmingCharacters(in: .newlines).replacingOccurrences(of: "\n", with: "\n" + type + " ") }
                 .joined(separator: " "),
             to: &stream
         )
