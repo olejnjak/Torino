@@ -1,4 +1,5 @@
 import Foundation
+import Logger
 
 protocol AutoPrefixServicing {
     func autoPrefix() throws -> String

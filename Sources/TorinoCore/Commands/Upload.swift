@@ -1,6 +1,7 @@
 import ArgumentParser
-import TSCBasic
 import GCP_Remote
+import Logger
+import TSCBasic
 
 struct UploadError: Error {
     let message: String

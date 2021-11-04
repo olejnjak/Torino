@@ -1,27 +1,28 @@
 import Foundation
 import TSCUtility
 
-protocol Logging {
+public protocol Logging {
     func logStdout(_ output: String...)
     func info(_ info: String...)
+    func error(_ error: String...)
 }
 
-struct Logger: Logging {
-    static let shared = Logger()
+public struct Logger: Logging {
+    public static let shared = Logger()
     
     private init() {
         
     }
     
-    func logStdout(_ output: String...) {
+    public func logStdout(_ output: String...) {
         print(type: "[OUTPUT]", output: output, to: &StandardOutputStream.stdout)
     }
     
-    func info(_ info: String...) {
+    public func info(_ info: String...) {
         print(type: "[INFO]", output: info, to: &StandardOutputStream.stdout)
     }
     
-    func error(_ error: String...) {
+    public func error(_ error: String...) {
         print(type: "[ERROR]", output: error, to: &StandardOutputStream.stderr)
     }
     

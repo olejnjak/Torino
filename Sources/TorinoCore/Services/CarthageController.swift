@@ -1,4 +1,5 @@
 import Foundation
+import Logger
 
 protocol CarthageControlling {
     func build(_ args: CarthageArguments) throws

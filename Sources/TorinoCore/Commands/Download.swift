@@ -1,6 +1,7 @@
 import ArgumentParser
-import TSCBasic
 import GCP_Remote
+import Logger
+import TSCBasic
 
 struct DownloadError: Error {
     let message: String
