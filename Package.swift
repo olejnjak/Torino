@@ -30,6 +30,7 @@ let package = Package(
             name: "TorinoCore",
             dependencies: [
                 "GCP_Remote",
+                "Logger",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
             ]
@@ -41,8 +42,15 @@ let package = Package(
         .target(
             name: "GCP_Remote",
             dependencies: [
+                "Logger",
                 .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
                 .product(name: "JWTKit", package: "jwt-kit")
+            ]
+        ),
+        .target(
+            name: "Logger",
+            dependencies: [
+                .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
             ]
         ),
     ]
