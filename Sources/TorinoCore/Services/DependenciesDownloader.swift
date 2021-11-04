@@ -1,6 +1,7 @@
 import Foundation
-import TSCBasic
 import GCP_Remote
+import Logger
+import TSCBasic
 
 struct DependenciesDownloadError: Error {
     let message: String
@@ -20,6 +21,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
     private let fileSystem: FileSystem
     private let gcpDownloader: GCPDownloading?
     private let pathProvider: PathProviding
+    private let logger: Logging
     
     // MARK: - Initializers
     
@@ -27,11 +29,13 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
         archiveService: ArchiveServicing = ZipService(system: System.shared),
         fileSystem: FileSystem = localFileSystem,
         gcpDownloader: GCPDownloading?,
+        logger: Logging = Logger.shared,
         pathProvider: PathProviding
     ) {
         self.archiveService = archiveService
         self.fileSystem = fileSystem
         self.gcpDownloader = gcpDownloader
+        self.logger = logger
         self.pathProvider = pathProvider
     }
     
@@ -41,7 +45,12 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
         let buildDir = pathProvider.buildDir()
         let missingDependencies = missingLocalDependencies(dependencies)
         
-        try? downloadMissingDependencies(missingDependencies)
+        if missingDependencies.isEmpty {
+            logger.info("All dependencies are available in local cache")
+        } else {
+            try? downloadMissingDependencies(missingDependencies)
+        }
+        
         try? fileSystem.createDirectory(buildDir, recursive: true)
         
         dependencies.forEach { dependency in
@@ -52,10 +61,14 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
             
             guard fileSystem.exists(cachePath) else { return }
             
-            try? archiveService.unarchive(
-                from: cachePath,
-                destination: buildDir
-            )
+            do {
+                try archiveService.unarchive(
+                    from: cachePath,
+                    destination: buildDir
+                )
+            } catch {
+                logger.error("Unable to extract cached dependency", dependency.name, dependency.version)
+            }
         }
     }
     
