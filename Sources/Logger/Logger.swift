@@ -37,16 +37,17 @@ public struct Logger: Logging {
 }
 
 private final class StandardOutputStream: TextOutputStream {
-    static var stdout = StandardOutputStream(stream: Darwin.stdout)
-    static var stderr = StandardOutputStream(stream: Darwin.stderr)
-    
-    private let stream: UnsafeMutablePointer<FILE>
-    
-    private init(stream: UnsafeMutablePointer<FILE>) {
+    static var stdout = StandardOutputStream(stream: FileHandle.standardOutput)
+    static var stderr = StandardOutputStream(stream: FileHandle.standardError)
+
+    private let stream: FileHandle
+
+    private init(stream: FileHandle) {
         self.stream = stream
     }
-    
+
     func write(_ string: String) {
-        fputs(string, stream)
+        guard let data = string.data(using: .utf8) else { return }
+        stream.write(data)
     }
 }
