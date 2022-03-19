@@ -15,9 +15,9 @@ final class UploadService {
         self.dependenciesUploader = dependenciesUploader
     }
     
-    func run(path: AbsolutePath) throws {
+    func run(path: AbsolutePath) async throws {
         let dependencies = try dependenciesLoader.loadDependencies(at: path)
         
-        try dependenciesUploader.uploadDependencies(dependencies)
+        try await dependenciesUploader.uploadDependencies(dependencies)
     }
 }

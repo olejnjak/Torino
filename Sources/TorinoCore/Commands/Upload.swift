@@ -1,4 +1,5 @@
 import ArgumentParser
+import Foundation
 import GCP_Remote
 import Logger
 import TSCBasic
@@ -37,9 +38,19 @@ struct Upload: ParsableCommand {
         
         logger.info("Trying to upload cached dependencies with prefix", prefix)
         
-        try UploadService(
-            dependenciesLoader: CarthageDependenciesLoader(pathProvider: pathProvider),
-            dependenciesUploader: LocalDependenciesUploader(pathProvider: pathProvider, gcpUploader: gcpUploader)
-        ).run(path: cwd)
+        let group = DispatchGroup()
+        
+        group.enter()
+        
+        Task {
+            try await UploadService(
+                dependenciesLoader: CarthageDependenciesLoader(pathProvider: pathProvider),
+                dependenciesUploader: LocalDependenciesUploader(pathProvider: pathProvider, gcpUploader: gcpUploader)
+            ).run(path: cwd)
+            
+            group.leave()
+        }
+        
+        group.wait()
     }
 }

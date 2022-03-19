@@ -8,6 +8,7 @@ struct RequestError: Error {
 extension URLSession {
     static let torino = URLSession(configuration: .ephemeral)
     
+    @available(*, deprecated, renamed: "data(request:)")
     func syncDataTask(for request: URLRequest) throws -> (Data?, URLResponse?) {
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -35,5 +36,40 @@ extension URLSession {
         }
         
         throw RequestError(response: resultResponse, data: resultData)
+    }
+}
+
+// Swift Concurrency API is available from macOS 12,
+// to support lower deployment target we need following extensions
+@available(macOS, deprecated: 12.0, message: "Use the built-in API instead")
+extension URLSession {
+    func data(request: URLRequest) async throws -> (Data, URLResponse) {
+        try await withUnsafeThrowingContinuation { continuation in
+            let task = self.dataTask(with: request) { data, response, error in
+                guard let data = data, let response = response else {
+                    let error = error ?? URLError(.badServerResponse)
+                    return continuation.resume(throwing: error)
+                }
+                
+                if let httpResponse = (response as? HTTPURLResponse),
+                   (200...299).contains(httpResponse.statusCode) {
+                    continuation.resume(returning: (data, response))
+                } else {
+                    continuation.resume(
+                        throwing:
+                            URLError(
+                                .cannotParseResponse,
+                                userInfo: [:]
+                            )
+                    )
+                }
+            }
+            
+            task.resume()
+        }
+    }
+    
+    func data(url: URL) async throws -> (Data, URLResponse) {
+        try await data(request: URLRequest(url: url))
     }
 }
