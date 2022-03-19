@@ -7,7 +7,7 @@ struct DependenciesUploadError: Error {
 }
 
 protocol DependenciesUploading {
-    func uploadDependencies(_ dependencies: [Dependency]) throws
+    func uploadDependencies(_ dependencies: [Dependency]) async throws
 }
 
 struct LocalDependenciesUploader: DependenciesUploading {
@@ -30,7 +30,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
         self.gcpUploader = gcpUploader
     }
     
-    func uploadDependencies(_ dependencies: [Dependency]) throws {
+    func uploadDependencies(_ dependencies: [Dependency]) async throws {
         let buildDir = pathProvider.buildDir()
         var uploadItems = [UploadItem]()
         
@@ -57,7 +57,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
         }
         
         if let gcpUploader = gcpUploader {
-            try gcpUploader.upload(items: uploadItems)
+            try await gcpUploader.upload(items: uploadItems)
         }
     }
 }
