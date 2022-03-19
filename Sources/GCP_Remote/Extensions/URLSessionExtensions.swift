@@ -51,7 +51,18 @@ extension URLSession {
                     return continuation.resume(throwing: error)
                 }
                 
-                continuation.resume(returning: (data, response))
+                if let httpResponse = (response as? HTTPURLResponse),
+                   (200...299).contains(httpResponse.statusCode) {
+                    continuation.resume(returning: (data, response))
+                } else {
+                    continuation.resume(
+                        throwing:
+                            URLError(
+                                .cannotParseResponse,
+                                userInfo: [:]
+                            )
+                    )
+                }
             }
             
             task.resume()
@@ -59,17 +70,6 @@ extension URLSession {
     }
     
     func data(url: URL) async throws -> (Data, URLResponse) {
-        try await withUnsafeThrowingContinuation { continuation in
-            let task = self.dataTask(with: url) { data, response, error in
-                guard let data = data, let response = response else {
-                    let error = error ?? URLError(.badServerResponse)
-                    return continuation.resume(throwing: error)
-                }
-                
-                continuation.resume(returning: (data, response))
-            }
-            
-            task.resume()
-        }
+        try await data(request: URLRequest(url: url))
     }
 }
