@@ -1,6 +1,7 @@
 import Foundation
 import TSCBasic
 import Logger
+import CryptoKit
 
 public typealias UploadItem = (localFile: AbsolutePath, remotePath: String)
 
@@ -48,19 +49,23 @@ public struct GCPUploader: GCPUploading {
             
             logger.info("Uploading dependency", name)
             
-            var urlComponents = URLComponents(string: "https://storage.googleapis.com/upload/storage/v1/b/" + config.bucket + "/o")!
-            urlComponents.queryItems = [
-                .init(name: "uploadType", value: "media"),
-                .init(name: "name", value: remotePath),
-            ]
-            
-            var request = URLRequest(url: urlComponents.url!)
-            token.addToRequest(&request)
-            request.setValue("application/zip", forHTTPHeaderField: "Content-Type")
-            request.httpMethod = "POST"
-            
             do {
-                request.httpBody = try Data(contentsOf: localPath.asURL)
+                let existingMetadata = try? await gcpAPI.metadata(
+                    object: remotePath,
+                    bucket: config.bucket,
+                    token: token
+                )
+                
+                if let currentMD5 = existingMetadata?.md5Hash,
+                    let data = try? Data(contentsOf: localPath.asURL) {
+                    let md5 = Data(Insecure.MD5.hash(data: data))
+                        .base64EncodedString()
+                    
+                    if currentMD5 == md5 {
+                        logger.info("Dependency " + name + " has not changed, skipping upload")
+                        return
+                    }
+                }
                 
                 try await gcpAPI.upload(
                     file: localPath.asURL,
@@ -72,6 +77,7 @@ public struct GCPUploader: GCPUploading {
             } catch {
                 logger.info("Unable to upload dependency", name)
                 logger.error(error.localizedDescription)
+                throw error
             }
         }
     }

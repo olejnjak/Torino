@@ -13,11 +13,17 @@ public protocol GCPAPIServicing {
         bucket: String,
         token: AccessToken
     ) async throws
+    
+    func metadata(
+        object: String,
+        bucket: String,
+        token: AccessToken
+    ) async throws -> Metadata
 }
 
 public final class GCPAPIService: GCPAPIServicing {
     private enum Action: String {
-        case download, upload
+        case download, upload, get = ""
     }
     
     private let session: URLSession
@@ -77,6 +83,24 @@ public final class GCPAPIService: GCPAPIServicing {
         try await session.upload(request: request, fromFile: file)
     }
     
+    public func metadata(
+        object: String,
+        bucket: String,
+        token: AccessToken
+    ) async throws -> Metadata {
+        var request = URLRequest(url: url(
+            action: .get,
+            bucket: bucket,
+            object: object
+        ))
+        token.addToRequest(&request)
+        request.httpMethod = "GET"
+        return try await JSONDecoder().decode(
+            Metadata.self,
+            from: session.data(request: request).0
+        )
+    }
+    
     // MARK: - Private helpers
     
     private func url(
@@ -90,7 +114,9 @@ public final class GCPAPIService: GCPAPIServicing {
             "storage/v1/b",
             bucket,
             "o",
-            object,
-        ].compactMap { $0 }.joined(separator: "/"))!
+            object?.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
+        ].compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .joined(separator: "/"))!
     }
 }
