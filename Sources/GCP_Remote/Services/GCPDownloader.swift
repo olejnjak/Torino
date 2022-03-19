@@ -40,7 +40,11 @@ public struct GCPDownloader: GCPDownloading {
         }
         
         let sa = try loadServiceAccount(path: config.serviceAccountPath)
-        let token = try authAPI.fetchAccessToken(serviceAccount: sa, validFor: 60, readOnly: false)
+        let token = try await authAPI.fetchAccessToken(
+            serviceAccount: sa,
+            validFor: 60,
+            readOnly: false
+        )
         
         await items.asyncForEach { remotePath, localPath in
             let name = localPath.basenameWithoutExt

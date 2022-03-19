@@ -8,7 +8,7 @@ public protocol AuthAPIServicing {
         serviceAccount: ServiceAccount,
         validFor interval: TimeInterval,
         readOnly: Bool
-    ) throws -> AccessToken
+    ) async throws -> AccessToken
 }
 
 /// Service that fetches an access token from further communication
@@ -34,7 +34,7 @@ public struct AuthAPIService: AuthAPIServicing {
         serviceAccount: ServiceAccount,
         validFor interval: TimeInterval,
         readOnly: Bool
-    ) throws -> AccessToken {
+    ) async throws -> AccessToken {
         let claims = self.claims(serviceAccount: serviceAccount, validFor: interval, readOnly: readOnly)
         let jwt = try self.jwt(for: serviceAccount, claims: claims)
         let requestData = AccessTokenRequest(assertion: jwt)
@@ -42,7 +42,10 @@ public struct AuthAPIService: AuthAPIServicing {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(requestData)
-        return try decoder.decode(AccessToken.self, from: try session.syncDataTask(for: request).0 ?? Data())
+        return try await decoder.decode(
+            AccessToken.self,
+            from: session.data(request: request).0
+        )
     }
     
     // MARK: - Private helpers

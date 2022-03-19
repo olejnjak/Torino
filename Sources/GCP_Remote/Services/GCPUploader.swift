@@ -30,7 +30,11 @@ public struct GCPUploader: GCPUploading {
         guard items.count > 0 else { return }
         
         let sa = try loadServiceAccount(path: config.serviceAccountPath)
-        let token = try authAPI.fetchAccessToken(serviceAccount: sa, validFor: 60, readOnly: false)
+        let token = try await authAPI.fetchAccessToken(
+            serviceAccount: sa,
+            validFor: 60,
+            readOnly: false
+        )
         
         try await items.asyncForEach { localPath, remotePath in
             var urlComponents = URLComponents(string: "https://storage.googleapis.com/upload/storage/v1/b/" + config.bucket + "/o")!
