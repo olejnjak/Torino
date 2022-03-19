@@ -17,7 +17,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMajor(from: "1.0.1")),
+        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "1.0.1")),
         .package(url: "https://github.com/apple/swift-tools-support-core", .upToNextMajor(from: "0.2.0")),
         .package(url: "https://github.com/vapor/jwt-kit", .upToNextMajor(from: "4.2.6")),
     ],
