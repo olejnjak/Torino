@@ -7,8 +7,8 @@ public protocol GCPAPIServicing {
         token: AccessToken
     ) async throws -> Data
     
-    func uploadData(
-        _ data: Data,
+    func upload(
+        file: URL,
         object: String,
         bucket: String,
         token: AccessToken
@@ -54,8 +54,8 @@ public final class GCPAPIService: GCPAPIServicing {
         return try await session.data(request: request).0
     }
     
-    public func uploadData(
-        _ data: Data,
+    public func upload(
+        file: URL,
         object: String,
         bucket: String,
         token: AccessToken
@@ -73,9 +73,8 @@ public final class GCPAPIService: GCPAPIServicing {
         token.addToRequest(&request)
         request.setValue("application/zip", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
-        request.httpBody = data
         
-        _ = try await session.data(request: request)
+        try await session.upload(request: request, fromFile: file)
     }
     
     // MARK: - Private helpers

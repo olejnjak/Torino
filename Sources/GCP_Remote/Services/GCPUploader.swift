@@ -62,8 +62,8 @@ public struct GCPUploader: GCPUploading {
             do {
                 request.httpBody = try Data(contentsOf: localPath.asURL)
                 
-                try await gcpAPI.uploadData(
-                    try Data(contentsOf: localPath.asURL),
+                try await gcpAPI.upload(
+                    file: localPath.asURL,
                     object: remotePath,
                     bucket: config.bucket,
                     token: token

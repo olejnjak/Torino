@@ -43,33 +43,55 @@ extension URLSession {
 // to support lower deployment target we need following extensions
 @available(macOS, deprecated: 12.0, message: "Use the built-in API instead")
 extension URLSession {
+    @discardableResult
     func data(request: URLRequest) async throws -> (Data, URLResponse) {
         try await withUnsafeThrowingContinuation { continuation in
-            let task = self.dataTask(with: request) { data, response, error in
-                guard let data = data, let response = response else {
-                    let error = error ?? URLError(.badServerResponse)
-                    return continuation.resume(throwing: error)
-                }
-                
-                if let httpResponse = (response as? HTTPURLResponse),
-                   (200...299).contains(httpResponse.statusCode) {
-                    continuation.resume(returning: (data, response))
-                } else {
-                    continuation.resume(
-                        throwing:
-                            URLError(
-                                .cannotParseResponse,
-                                userInfo: [:]
-                            )
-                    )
-                }
-            }
+            let task = self.dataTask(
+                with: request,
+                completionHandler: Self.taskCompletion(continuation: continuation)
+            )
             
             task.resume()
         }
     }
     
+    @discardableResult
     func data(url: URL) async throws -> (Data, URLResponse) {
         try await data(request: URLRequest(url: url))
+    }
+    
+    @discardableResult
+    func upload(request: URLRequest, fromFile file: URL) async throws -> (Data, URLResponse) {
+        try await withUnsafeThrowingContinuation { continuation in
+            let task = self.uploadTask(
+                with: request,
+                fromFile: file,
+                completionHandler: Self.taskCompletion(continuation: continuation)
+            )
+            
+            task.resume()
+        }
+    }
+    
+    private static func taskCompletion(continuation: UnsafeContinuation<(Data, URLResponse), Error>) -> (Data?, URLResponse?, Error?) -> () {
+        { data, response, error in
+            guard let data = data, let response = response else {
+                let error = error ?? URLError(.badServerResponse)
+                return continuation.resume(throwing: error)
+            }
+            
+            if let httpResponse = (response as? HTTPURLResponse),
+               (200...299).contains(httpResponse.statusCode) {
+                continuation.resume(returning: (data, response))
+            } else {
+                continuation.resume(
+                    throwing:
+                        URLError(
+                            .cannotParseResponse,
+                            userInfo: [:]
+                        )
+                )
+            }
+        }
     }
 }
