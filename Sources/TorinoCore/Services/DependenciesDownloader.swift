@@ -13,7 +13,7 @@ struct DownloadableDependency {
 }
 
 protocol DependenciesDownloading {
-    func downloadDependencies(dependencies: [DownloadableDependency]) throws
+    func downloadDependencies(dependencies: [DownloadableDependency]) async throws
 }
 
 struct LocalDependenciesDownloader: DependenciesDownloading {
@@ -41,14 +41,14 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
     
     // MARK: - Interface
     
-    func downloadDependencies(dependencies: [DownloadableDependency]) throws {
+    func downloadDependencies(dependencies: [DownloadableDependency]) async throws {
         let buildDir = pathProvider.buildDir()
         let missingDependencies = missingLocalDependencies(dependencies)
         
         if missingDependencies.isEmpty {
             logger.info("All dependencies are available in local cache")
         } else {
-            try? downloadMissingDependencies(missingDependencies)
+            try? await downloadMissingDependencies(missingDependencies)
         }
         
         try? fileSystem.createDirectory(buildDir, recursive: true)
@@ -85,7 +85,7 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
         }
     }
     
-    private func downloadMissingDependencies(_ missingDependencies: [DownloadableDependency]) throws {
+    private func downloadMissingDependencies(_ missingDependencies: [DownloadableDependency]) async throws {
         guard let gcpDownloader = gcpDownloader else {
             return
         }
@@ -97,6 +97,6 @@ struct LocalDependenciesDownloader: DependenciesDownloading {
             )
         }
         
-        try gcpDownloader.download(items: downloadItems)
+        try await gcpDownloader.download(items: downloadItems)
     }
 }

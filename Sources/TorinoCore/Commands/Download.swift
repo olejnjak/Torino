@@ -1,4 +1,5 @@
 import ArgumentParser
+import Foundation
 import GCP_Remote
 import Logger
 import TSCBasic
@@ -39,12 +40,24 @@ struct Download: ParsableCommand {
             return nil
         }()
         
-        logger.info("Trying to download cached dependencies with prefix", prefix)
-        try LocalDependenciesDownloader(gcpDownloader: gcpDownloader, pathProvider: pathProvider)
-            .downloadDependencies(
+        let group = DispatchGroup()
+        
+        group.enter()
+        
+        Task {
+            logger.info("Trying to download cached dependencies with prefix", prefix)
+            try await LocalDependenciesDownloader(
+                gcpDownloader: gcpDownloader,
+                pathProvider: pathProvider
+            ).downloadDependencies(
                 dependencies: lockfile.dependencies.map {
                     DownloadableDependency(name: $0.name, version: $0.version)
                 }
             )
+            
+            group.leave()
+        }
+        
+        group.wait()
     }
 }

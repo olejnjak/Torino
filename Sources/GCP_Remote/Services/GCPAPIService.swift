@@ -1,6 +1,6 @@
 import Foundation
 
-protocol GCPAPIServicing {
+public protocol GCPAPIServicing {
     func downloadObject(
         _ object: String,
         bucket: String,
@@ -15,7 +15,7 @@ protocol GCPAPIServicing {
     ) async throws
 }
 
-final class GCPAPIService: GCPAPIServicing {
+public final class GCPAPIService: GCPAPIServicing {
     private enum Action: String {
         case download, upload
     }
@@ -24,13 +24,17 @@ final class GCPAPIService: GCPAPIServicing {
     
     // MARK: - Initializers
     
+    public convenience init() {
+        self.init(session: .torino)
+    }
+    
     init(session: URLSession) {
         self.session = session
     }
     
     // MARK: - Interface
     
-    func downloadObject(
+    public func downloadObject(
         _ object: String,
         bucket: String,
         token: AccessToken
@@ -50,7 +54,7 @@ final class GCPAPIService: GCPAPIServicing {
         return try await session.data(request: request).0
     }
     
-    func uploadData(
+    public func uploadData(
         _ data: Data,
         object: String,
         bucket: String,
