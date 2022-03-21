@@ -80,6 +80,14 @@ public struct GCPUploader: GCPUploading {
                     bucket: config.bucket,
                     token: token
                 )
+                
+                try await gcpAPI.updateMetadata(
+                    .init(metadata: .init(carthageHash: localHash)),
+                    object: remotePath,
+                    bucket: config.bucket,
+                    token: token
+                )
+                
                 logger.info("Successfully uploaded dependency", name)
             } catch {
                 logger.info("Unable to upload dependency", name)

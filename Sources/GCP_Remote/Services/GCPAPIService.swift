@@ -19,6 +19,13 @@ public protocol GCPAPIServicing {
         bucket: String,
         token: AccessToken
     ) async throws -> Metadata
+    
+    func updateMetadata(
+        _ metadata: Metadata,
+        object: String,
+        bucket: String,
+        token: AccessToken
+    ) async throws
 }
 
 public final class GCPAPIService: GCPAPIServicing {
@@ -99,6 +106,21 @@ public final class GCPAPIService: GCPAPIServicing {
             Metadata.self,
             from: session.data(request: request).0
         )
+    }
+    
+    public func updateMetadata(
+        _ metadata: Metadata,
+        object: String,
+        bucket: String,
+        token: AccessToken
+    ) async throws {
+        var request = URLRequest(url: .init(string: "https://storage.googleapis.com/storage/v1/b/\(bucket)/o/\(object.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!)
+        token.addToRequest(&request)
+        request.httpMethod = "PATCH"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(metadata)
+        
+        try await session.data(request: request)
     }
     
     // MARK: - Private helpers

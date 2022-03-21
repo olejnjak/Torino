@@ -5,7 +5,7 @@ import JWTKit
 struct GoogleClaims: JWTPayload {
     enum Scope: String, Codable {
         case readOnly = "https://www.googleapis.com/auth/devstorage.read_only"
-        case readWrite = "https://www.googleapis.com/auth/devstorage.read_write"
+        case readWrite = "https://www.googleapis.com/auth/devstorage.full_control"
     }
     
     /// Service account email
