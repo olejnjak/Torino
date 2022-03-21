@@ -57,7 +57,8 @@ public struct CarthageDependenciesLoader: DependenciesLoading {
                 frameworks: $0.versionFile.allContainers.map {
                     .init(name: $0, path: buildDir.appending(component: $0))
                 },
-                versionFile: $0.path
+                versionFile: $0.path,
+                hash: $0.versionFile.combinedHash
             )
         }
     }

@@ -56,7 +56,7 @@ struct LocalDependenciesUploader: DependenciesUploading {
                     dependency: dependency.name,
                     version: dependency.version
                 ),
-                hash: "" // TODO: Implement
+                hash: dependency.hash
             ))
         }
         
