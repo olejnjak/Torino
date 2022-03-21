@@ -55,6 +55,12 @@ Torino currently supports remote cache stored in GCP buckets. To support that yo
 `TORINO_GCP_BUCKET` - name of bucket that will be used for storage<br>
 `TORINO_GCP_SERVICE_ACCOUNT_PATH` - location of service account that will be used for access to specified bucket
 
+### Environment configuration
+
+Here you can find additional environment variables that can configure Torino behavior
+
+`TORINO_LOG_LEVEL` - set to `debug` if you want to increase verbosity of output
+
 ## Naming 
 
 If you wonder why is Torino named after this Italian 🇮🇹  city, it is quite simple. As it works on top of [Carthage 🇹🇳][carthage] and is inspired by [Rome 🇮🇹][rome] and I am a fan of Juventus FC 🖤🤍 it was quite natural to name it this way 😎
