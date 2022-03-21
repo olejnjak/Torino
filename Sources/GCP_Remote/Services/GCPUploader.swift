@@ -50,16 +50,34 @@ public struct GCPUploader: GCPUploading {
             logger.info("Uploading dependency", name)
             
             do {
-                let existingMetadata = try? await gcpAPI.metadata(
-                    object: remotePath,
-                    bucket: config.bucket,
-                    token: token
-                )
+                let existingMetadata: Metadata?
+                
+                do {
+                    let metadata = try await gcpAPI.metadata(
+                        object: remotePath,
+                        bucket: config.bucket,
+                        token: token
+                    )
+                    existingMetadata = metadata
+                    logger.debug(
+                        "Existing MD5 for dependency",
+                        name,
+                        "is",
+                        metadata.md5Hash
+                    )
+                } catch {
+                    existingMetadata = nil
+                    logger.debug("Unable to fetch existing metadata")
+                    logger.debug(error)
+                }
                 
                 if let currentMD5 = existingMetadata?.md5Hash,
                     let data = try? Data(contentsOf: localPath.asURL) {
                     let md5 = Data(Insecure.MD5.hash(data: data))
                         .base64EncodedString()
+                    
+                    logger.debug("Comparing MD5 hash for dependendency", name)
+                    logger.debug("Local:", md5, "Remote:", currentMD5)
                     
                     if currentMD5 == md5 {
                         logger.info("Dependency " + name + " has not changed, skipping upload")
