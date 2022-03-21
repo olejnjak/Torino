@@ -50,10 +50,14 @@ struct LocalDependenciesUploader: DependenciesUploading {
                 destination: cachePath
             )
             
-            uploadItems.append((cachePath, pathProvider.remoteCachePath(
-                dependency: dependency.name,
-                version: dependency.version
-            )))
+            uploadItems.append(.init(
+                localFile: cachePath,
+                remotePath: pathProvider.remoteCachePath(
+                    dependency: dependency.name,
+                    version: dependency.version
+                ),
+                hash: dependency.hash
+            ))
         }
         
         if let gcpUploader = gcpUploader {

@@ -1,9 +1,6 @@
 import Foundation
-import TSCBasic
 import Logger
 import CryptoKit
-
-public typealias UploadItem = (localFile: AbsolutePath, remotePath: String)
 
 public protocol GCPUploading {
     func upload(items: [UploadItem]) async throws
@@ -44,42 +41,34 @@ public struct GCPUploader: GCPUploading {
             readOnly: false
         )
         
-        try await items.asyncForEach { localPath, remotePath in
+        try await items.asyncForEach {
+            let localPath = $0.localFile
+            let remotePath = $0.remotePath
+            let localHash = $0.hash
             let name = localPath.basenameWithoutExt
             
             logger.info("Uploading dependency", name)
             
             do {
-                let existingMetadata: Metadata?
+                let remoteHash: String?
                 
                 do {
-                    let metadata = try await gcpAPI.metadata(
+                    remoteHash = try await gcpAPI.metadata(
                         object: remotePath,
                         bucket: config.bucket,
                         token: token
-                    )
-                    existingMetadata = metadata
-                    logger.debug(
-                        "Existing MD5 for dependency",
-                        name,
-                        "is",
-                        metadata.md5Hash
-                    )
+                    ).metadata?.carthageHash
                 } catch {
-                    existingMetadata = nil
+                    remoteHash = nil
                     logger.debug("Unable to fetch existing metadata")
                     logger.debug(error)
                 }
                 
-                if let currentMD5 = existingMetadata?.md5Hash,
-                    let data = try? Data(contentsOf: localPath.asURL) {
-                    let md5 = Data(Insecure.MD5.hash(data: data))
-                        .base64EncodedString()
+                if let currentHash = remoteHash {
+                    logger.debug("Comparing hash for dependendency", name)
+                    logger.debug("Local:", localHash, "Remote:", remoteHash ?? "(nil)")
                     
-                    logger.debug("Comparing MD5 hash for dependendency", name)
-                    logger.debug("Local:", md5, "Remote:", currentMD5)
-                    
-                    if currentMD5 == md5 {
+                    if currentHash == localHash {
                         logger.info("Dependency " + name + " has not changed, skipping upload")
                         return
                     }
@@ -91,6 +80,14 @@ public struct GCPUploader: GCPUploading {
                     bucket: config.bucket,
                     token: token
                 )
+                
+                try await gcpAPI.updateMetadata(
+                    .init(metadata: .init(carthageHash: localHash)),
+                    object: remotePath,
+                    bucket: config.bucket,
+                    token: token
+                )
+                
                 logger.info("Successfully uploaded dependency", name)
             } catch {
                 logger.info("Unable to upload dependency", name)

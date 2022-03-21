@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import TSCBasic
 
@@ -5,6 +6,7 @@ public struct VersionFile: Decodable {
     public struct Framework: Decodable {
         public let name: String
         public let container: String?
+        public let hash: String
     }
     
     public let commitish: String
@@ -14,9 +16,22 @@ public struct VersionFile: Decodable {
     public let watchOS: [Framework]?
     
     public var allContainers: [String] {
-        [iOS, macOS, tvOS, watchOS].compactMap { $0 }
-            .joined()
-            .compactMap(\.container)
+        allFrameworks.compactMap(\.container)
+    }
+    
+    public var combinedHash: String {
+        let allHashes = allFrameworks.reduce("") { partialResult, container in
+            partialResult + String(container.hash.count) + container.hash
+        }
+        
+        return Data(Insecure.MD5.hash(data: allHashes.data(using: .utf8)!))
+            .base64EncodedString()
+    }
+    
+    private var allFrameworks: [Framework] {
+        [iOS, macOS, tvOS, watchOS]
+            .compactMap { $0 }
+            .flatMap { $0 }
     }
 }
 
