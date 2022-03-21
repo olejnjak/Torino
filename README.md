@@ -2,7 +2,7 @@
 
 Torino is a caching tool for XCFrameworks built by [Carthage][carthage]. Torino is considered an evolution to [Rome][rome] as its features are heavily inspired from its past usage, but focused strictly on XCFrameworks. Also big credit goes to [@LukasHromadnik](https://github.com/LukasHromadnik) as quite a lot of code was based on his private work.
 
-**⚠️ Torino is in early alpha so you should not rely on it yet**
+**⚠️ Torino is in early development so you should not rely on it yet**
 
 ## Installation
 
