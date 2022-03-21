@@ -46,12 +46,10 @@ public struct GCPDownloader: GCPDownloading {
             readOnly: false
         )
         
-        await items.asyncForEach { remotePath, localPath in
+        await items.asyncForEach { object, localPath in
             let name = localPath.basenameWithoutExt
             
             logger.info("Downloading dependency", name)
-            
-            let object = remotePath.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
             
             do {
                 let data = try await gcpAPI.downloadObject(
