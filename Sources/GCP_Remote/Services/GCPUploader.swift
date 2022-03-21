@@ -1,9 +1,6 @@
 import Foundation
-import TSCBasic
 import Logger
 import CryptoKit
-
-public typealias UploadItem = (localFile: AbsolutePath, remotePath: String)
 
 public protocol GCPUploading {
     func upload(items: [UploadItem]) async throws
@@ -44,7 +41,9 @@ public struct GCPUploader: GCPUploading {
             readOnly: false
         )
         
-        try await items.asyncForEach { localPath, remotePath in
+        try await items.asyncForEach {
+            let localPath = $0.localFile
+            let remotePath = $0.remotePath
             let name = localPath.basenameWithoutExt
             
             logger.info("Uploading dependency", name)
