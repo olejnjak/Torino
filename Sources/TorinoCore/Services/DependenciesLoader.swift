@@ -48,7 +48,7 @@ public struct CarthageDependenciesLoader: DependenciesLoading {
                     versionFile: try jsonDecoder.decode(VersionFile.self, from: data),
                     path: versionFilePath.path
                 )
-            }
+            }.filter { $0.versionFile.allFrameworks.isEmpty == false }
         
         return versionFiles.map {
             Dependency(

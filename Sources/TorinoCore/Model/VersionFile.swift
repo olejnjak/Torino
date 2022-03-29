@@ -28,10 +28,11 @@ public struct VersionFile: Decodable {
             .base64EncodedString()
     }
     
-    private var allFrameworks: [Framework] {
+    public var allFrameworks: [Framework] {
         [iOS, macOS, tvOS, watchOS]
             .compactMap { $0 }
             .flatMap { $0 }
+            .filter { ($0.container ?? "").isEmpty == false }
     }
 }
 
