@@ -25,6 +25,12 @@ struct Download: ParsableCommand {
         )
         
         let lockfilePath = pathProvider.lockfile()
+        
+        guard localFileSystem.exists(lockfilePath) else {
+            logger.info("No Cartfile.resolved found at '\(lockfilePath)', finishing early")
+            return
+        }
+        
         let lockfileContent = try localFileSystem.readFileContents(lockfilePath)
         let lockfile = Lockfile.from(string: lockfileContent.cString)
         
