@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/vapor/jwt-kit",
         "state": {
           "branch": null,
-          "revision": "5f9c44d4c196cc06c3fc601f279169f121d6f62d",
-          "version": "4.4.0"
+          "revision": "87ce13a1df913ba4d51cf00606df7ef24d455571",
+          "version": "4.7.0"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "82905286cc3f0fa8adc4674bf49437cab65a8373",
-          "version": "1.1.1"
+          "revision": "fddd1c00396eed152c45a46bea9f47b98e59301d",
+          "version": "1.2.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/apple/swift-crypto.git",
         "state": {
           "branch": null,
-          "revision": "a8911e0fadc25aef1071d582355bd1037a176060",
-          "version": "2.0.4"
+          "revision": "71ae6adf89ba5346a209ec7f48dbb571a7e8ad1e",
+          "version": "2.2.1"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/apple/swift-tools-support-core",
         "state": {
           "branch": null,
-          "revision": "b7667f3e266af621e5cc9c77e74cacd8e8c00cb4",
-          "version": "0.2.5"
+          "revision": "0b77e67c484e532444ceeab60119b8536f8cd648",
+          "version": "0.3.0"
         }
       }
     ]
