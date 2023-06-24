@@ -7,7 +7,8 @@ public struct TorinoCore: ParsableCommand {
             Upload.self,
             Download.self,
             Bootstrap.self,
-            Update.self
+            Update.self,
+            Clean.self
         ]
     )
     
