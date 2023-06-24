@@ -6,6 +6,9 @@ public protocol PathProviding {
     ///
     ///  E.g. for Carthage `Carthage/Build`
     func buildDir() -> AbsolutePath
+
+    /// Root directory where Torino cache is stored
+    func cacheDir() -> AbsolutePath
     
     /// Directory where Torino cache is stored
     func cacheDir(dependency: String, version: String) -> AbsolutePath
@@ -43,6 +46,10 @@ struct CarthagePathProvider: PathProviding {
     
     func buildDir() -> AbsolutePath {
         base.appending(components: "Carthage", "Build")
+    }
+
+    func cacheDir() -> AbsolutePath {
+        _cacheDir
     }
     
     func cacheDir(dependency: String, version: String) -> AbsolutePath {
