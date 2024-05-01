@@ -21,7 +21,7 @@ final class ZipService: ArchiveServicing {
         do {
             try shell(
                 [
-                    "zip", "-ruq",
+                    "zip", "-ruqy",
                     destination.pathString,
                 ] + files.map(\.pathString),
                 cwd: basePath
