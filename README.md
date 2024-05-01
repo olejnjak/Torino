@@ -32,22 +32,6 @@ Download command has single option `--prefix`.
 Torino download --prefix "Swift-5.5"
 ```
 
-### Bootstrap
-
-This command is designed to simplify bootstrapping your projects. At first it tries to get your dependencies from cache (local or remote based on your configuration), then it calls `carthage bootstrap` with respective arguments, to ensure you have all dependencies and then optionally caches new dependencies (`--upload`).
-
-```
-Torino bootstrap --prefix "Swift-5.5" --platform iOS --upload
-```
-
-### Update
-
-This command is designed simplify updating dependencies on your projects. At first it runs `carthage update --no-build` to update your _Cartfile.resolved_, then tries to get dependencies from cache, the runs `carthage build` with respective arguments and optionally caches new dependencies (`--upload`).
-
-```
-Torino update --prefix "Swift-5.5" --platform iOS --upload
-```
-
 ### Remote caching
 
 Torino currently supports remote cache stored in GCP buckets. To support that you need to provide two environment variables:
