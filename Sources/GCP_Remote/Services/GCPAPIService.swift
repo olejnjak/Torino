@@ -65,7 +65,7 @@ public final class GCPAPIService: GCPAPIServicing {
         token.addToRequest(&request)
         request.httpMethod = "GET"
         
-        return try await session.data(request: request).0
+        return try await session.data(for: request).0
     }
     
     public func upload(
@@ -87,8 +87,8 @@ public final class GCPAPIService: GCPAPIServicing {
         token.addToRequest(&request)
         request.setValue("application/zip", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
-        
-        try await session.upload(request: request, fromFile: file)
+
+        _ = try await session.upload(for: request, fromFile: file)
     }
     
     public func metadata(
@@ -105,7 +105,7 @@ public final class GCPAPIService: GCPAPIServicing {
         request.httpMethod = "GET"
         return try await JSONDecoder().decode(
             Metadata.self,
-            from: session.data(request: request).0
+            from: session.data(for: request).0
         )
     }
     
@@ -121,7 +121,7 @@ public final class GCPAPIService: GCPAPIServicing {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(metadata)
         
-        try await session.data(request: request)
+        _ = try await session.data(for: request)
     }
     
     // MARK: - Private helpers
