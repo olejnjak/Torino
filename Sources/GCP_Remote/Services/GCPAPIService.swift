@@ -1,30 +1,31 @@
 import Foundation
+import GoogleAuth
 
 public protocol GCPAPIServicing {
     func downloadObject(
         _ object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws -> Data
     
     func upload(
         file: URL,
         object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws
     
     func metadata(
         object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws -> Metadata
     
     func updateMetadata(
         _ metadata: Metadata,
         object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws
 }
 
@@ -50,7 +51,7 @@ public final class GCPAPIService: GCPAPIServicing {
     public func downloadObject(
         _ object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws -> Data {
         var urlComponents = URLComponents(string: url(
             action: .download,
@@ -71,7 +72,7 @@ public final class GCPAPIService: GCPAPIServicing {
         file: URL,
         object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws {
         var urlComponents = URLComponents(string: url(
             action: .upload,
@@ -93,7 +94,7 @@ public final class GCPAPIService: GCPAPIServicing {
     public func metadata(
         object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws -> Metadata {
         var request = URLRequest(url: url(
             action: .get,
@@ -112,7 +113,7 @@ public final class GCPAPIService: GCPAPIServicing {
         _ metadata: Metadata,
         object: String,
         bucket: String,
-        token: AccessToken
+        token: Token
     ) async throws {
         var request = URLRequest(url: .init(string: "https://storage.googleapis.com/storage/v1/b/\(bucket)/o/\(object.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!)
         token.addToRequest(&request)
