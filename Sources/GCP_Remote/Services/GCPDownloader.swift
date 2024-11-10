@@ -1,4 +1,5 @@
 import Foundation
+import GoogleAuth
 import TSCBasic
 import Logger
 
@@ -9,7 +10,6 @@ public protocol GCPDownloading {
 }
 
 public struct GCPDownloader: GCPDownloading {
-    private let authAPI: AuthAPIServicing
     private let gcpAPI: GCPAPIServicing
     private let fileSystem: FileSystem
     private let logger: Logging
@@ -18,13 +18,11 @@ public struct GCPDownloader: GCPDownloading {
     // MARK: - Initializers
     
     public init(
-        authAPI: AuthAPIServicing = AuthAPIService(),
         gcpAPI: GCPAPIServicing = GCPAPIService(),
         fileSystem: FileSystem = localFileSystem,
         logger: Logging = Logger.shared,
         config: GCPConfig
     ) {
-        self.authAPI = authAPI
         self.gcpAPI = gcpAPI
         self.fileSystem = fileSystem
         self.logger = logger
@@ -38,14 +36,24 @@ public struct GCPDownloader: GCPDownloading {
             logger.info("Nothing to download")
             return
         }
-        
-        let sa = try loadServiceAccount(path: config.serviceAccountPath)
-        let token = try await authAPI.fetchAccessToken(
-            serviceAccount: sa,
-            validFor: 60,
-            readOnly: false
-        )
-        
+
+        let tokenProvider: TokenProvider
+        let scopes = ["https://www.googleapis.com/auth/devstorage.full_control"]
+
+        if let saPath = config.serviceAccountPath {
+            tokenProvider = try await ServiceAccountTokenProvider(
+                serviceAccountPath: saPath,
+                scopes: scopes
+            )
+        } else if let provider = await DefaultCredentialsTokenProvider(scopes: scopes) {
+            tokenProvider = provider
+        } else {
+            struct CannotCreateProvider: Error { }
+            throw CannotCreateProvider()
+        }
+
+        let token = try await tokenProvider.token()
+
         await items.asyncForEach { object, localPath in
             let name = localPath.basenameWithoutExt
             

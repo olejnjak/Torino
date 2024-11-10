@@ -7,9 +7,9 @@ public struct GCPConfig: Decodable {
     }
     
     public let bucket: String
-    public let serviceAccountPath: String
-    
-    public init(bucket: String, serviceAccountPath: String) {
+    public let serviceAccountPath: String?
+
+    public init(bucket: String, serviceAccountPath: String?) {
         self.bucket = bucket
         self.serviceAccountPath = serviceAccountPath
     }

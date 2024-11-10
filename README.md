@@ -34,9 +34,11 @@ Torino download --prefix "Swift-5.5"
 
 ### Remote caching
 
-Torino currently supports remote cache stored in GCP buckets. To support that you need to provide two environment variables:
+Torino currently supports remote cache stored in GCP buckets. To support that you need to provide an environment variables:
 
 `TORINO_GCP_BUCKET` - name of bucket that will be used for storage<br>
+
+For authorization you can either use `TORINO_GCP_SERVICE_ACCOUNT_PATH` or [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials)
 `TORINO_GCP_SERVICE_ACCOUNT_PATH` - location of service account that will be used for access to specified bucket
 
 ### Environment configuration

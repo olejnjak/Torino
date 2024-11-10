@@ -1,4 +1,5 @@
 import Foundation
+import GoogleAuth
 import Logger
 import CryptoKit
 
@@ -7,7 +8,6 @@ public protocol GCPUploading {
 }
 
 public struct GCPUploader: GCPUploading {
-    private let authAPI: AuthAPIServicing
     private let gcpAPI: GCPAPIServicing
     private let logger: Logging
     private let config: GCPConfig
@@ -15,12 +15,10 @@ public struct GCPUploader: GCPUploading {
     // MARK: - Initializers
     
     public init(
-        authAPI: AuthAPIServicing = AuthAPIService(),
         gcpAPI: GCPAPIServicing = GCPAPIService(),
         logger: Logging = Logger.shared,
         config: GCPConfig
     ) {
-        self.authAPI = authAPI
         self.gcpAPI = gcpAPI
         self.logger = logger
         self.config = config
@@ -34,13 +32,23 @@ public struct GCPUploader: GCPUploading {
             return
         }
         
-        let sa = try loadServiceAccount(path: config.serviceAccountPath)
-        let token = try await authAPI.fetchAccessToken(
-            serviceAccount: sa,
-            validFor: 60,
-            readOnly: false
-        )
-        
+        let tokenProvider: TokenProvider
+        let scopes = ["https://www.googleapis.com/auth/devstorage.full_control"]
+
+        if let saPath = config.serviceAccountPath {
+            tokenProvider = try await ServiceAccountTokenProvider(
+                serviceAccountPath: saPath,
+                scopes: scopes
+            )
+        } else if let provider = await DefaultCredentialsTokenProvider(scopes: scopes) {
+            tokenProvider = provider
+        } else {
+            struct CannotCreateProvider: Error { }
+            throw CannotCreateProvider()
+        }
+
+        let token = try await tokenProvider.token()
+
         try await items.asyncForEach {
             let localPath = $0.localFile
             let remotePath = $0.remotePath
